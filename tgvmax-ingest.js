@@ -137,7 +137,7 @@ function buildEngineData(records) {
 
     const originId = 'TGVMAX:' + slugify(r.origin);
     const destId   = 'TGVMAX:' + slugify(r.dest);
-    const tripId   = `TGVMAX:${r.date}:${r.trainNo || slugify(r.origin) + '_' + slugify(r.dest)}:${r.dep.replace(':', '')}`;
+    const tripId   = `TGVMAX:${r.date}:${r.trainNo || slugify(r.origin)}:${r.dep.replace(':', '')}:${slugify(r.dest)}`;
 
     // Gares
     if (!stops[originId]) {
