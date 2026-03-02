@@ -1,374 +1,644 @@
 /**
- * server.js — TGVmax Engine
+ * server.js — Moteur TGVmax
  *
- * GET /search?from=Paris&to=Lyon&date=2025-06-15
- *            [&maxChanges=1]       — 0=direct, 1=1 correspondance, 2=2 correspondances (défaut: 1)
- *            [&minTransfer=30]     — minutes de correspondance minimum (défaut: 30)
- *            [&maxTransfer=180]    — minutes de correspondance maximum (défaut: 180)
+ * Charge les données TGVmax générées par tgvmax-ingest.js
+ * et expose une API REST pour rechercher des trajets.
  *
- * GET /stations?q=paris
- * GET /health
+ * Routes :
+ *   GET /eveille                          — ping / état du moteur
+ *   GET /api/meta                         — métadonnées de l'ingestion
+ *   GET /api/stops?q=paris                — autocomplétion des gares
+ *   GET /api/cities?q=par                 — autocomplétion ville (multi-gares)
+ *   GET /api/search?from=X&to=Y&date=D    — recherche de trajets directs TGVmax
+ *   GET /api/transfer?from=X&to=Y&date=D — recherche avec 1 correspondance
+ *   GET /api/explore?from=X&date=D        — toutes les destinations disponibles
+ *   GET /api/debug/trips?stop=ID&date=D   — debug : départs d'un stop
  */
-
-'use strict';
 
 const http = require('http');
 const fs   = require('fs');
 const path = require('path');
 const url  = require('url');
 
-const PORT      = process.env.PORT     || 3000;
-const DATA_DIR  = process.env.DATA_DIR || './engine_data';
-const STATIONS_FILE = path.join(__dirname, 'stations.json');
+const DATA_DIR = process.env.DATA_DIR || './engine_data';
+const PORT     = process.env.PORT     || 3000;
 
-// ─── Chargement des données ───────────────────────────────────────────────────
+// ─── Données en RAM ───────────────────────────────────────────────────────────
+let trips         = {};  // trip_id → trip object
+let stops         = {};  // stop_id → { name, lat, lon }
+let routesByStop  = {};  // stop_id → [trip_ids]
+let calendarIndex = {};  // date ISO → [trip_ids]
+let meta          = {};
 
-console.log('\n📦 Chargement engine_data...');
+let stopsIndex = [];   // pour l'autocomplétion
+let cityIndex  = new Map();
+
+const COUNTRY_NAMES = { FR:'France' };
+
+// ─── État du moteur ───────────────────────────────────────────────────────────
+let engineReady    = false;
+let engineError    = null;
+let engineLoadedAt = null;
+let engineLoadMs   = null;
 
 function loadJSON(filename) {
   const p = path.join(DATA_DIR, filename);
-  if (!fs.existsSync(p)) throw new Error(`Fichier manquant : ${p}`);
+  if (!fs.existsSync(p)) throw new Error('Fichier manquant : ' + p);
   return JSON.parse(fs.readFileSync(p, 'utf8'));
 }
 
-const trips         = loadJSON('trips.json');
-const stops         = loadJSON('stops.json');
-const routesByStop  = loadJSON('routes_by_stop.json');
-const calendarIndex = loadJSON('calendar_index.json');
-const meta          = loadJSON('meta.json');
+// ─── Chargement ───────────────────────────────────────────────────────────────
 
-let stations = [];
-if (fs.existsSync(STATIONS_FILE)) {
-  stations = JSON.parse(fs.readFileSync(STATIONS_FILE, 'utf8'));
+function initEngine() {
+  console.log('\n🚄 Chargement moteur TGVmax...');
+  const t = Date.now();
+
+  trips         = loadJSON('trips.json');
+  stops         = loadJSON('stops.json');
+  routesByStop  = loadJSON('routes_by_stop.json');
+  calendarIndex = loadJSON('calendar_index.json');
+  meta          = loadJSON('meta.json');
+
+  buildStopsIndex();
+
+  const totalTrips = Object.keys(trips).length;
+  engineLoadMs   = Date.now() - t;
+  engineLoadedAt = new Date().toISOString();
+  engineReady    = true;
+  console.log('✅ Prêt en ' + engineLoadMs + 'ms — ' + totalTrips.toLocaleString() + ' trajets TGVmax chargés\n');
 }
 
-console.log(`  ✓ ${Object.keys(trips).length.toLocaleString()} trajets`);
-console.log(`  ✓ ${Object.keys(stops).length.toLocaleString()} gares`);
-console.log(`  ✓ ${stations.length} stations indexées`);
-console.log(`  ✓ Données du ${meta.date_range?.first} au ${meta.date_range?.last}\n`);
+// ─── Autocomplétion ───────────────────────────────────────────────────────────
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+function buildStopsIndex() {
+  stopsIndex = [];
+  cityIndex  = new Map();
 
-function normalize(str) {
-  return (str || '')
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const stFile = path.join(__dirname, 'stations.json');
+  if (fs.existsSync(stFile)) {
+    const raw = JSON.parse(fs.readFileSync(stFile, 'utf8'));
+    for (const s of raw) {
+      const city    = s.city    || s.name;
+      const country = s.country || 'FR';
+      stopsIndex.push({ name:s.name, city, country, stopIds:s.stopIds||[], operators:s.operators||[], lat:s.lat||0, lon:s.lon||0 });
+
+      const key = city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') + ':' + country;
+      if (!cityIndex.has(key)) {
+        cityIndex.set(key, {
+          city, country, countryName: COUNTRY_NAMES[country] || country,
+          stopIds: new Set(s.stopIds||[]), ops: new Set(s.operators||[]),
+          stations: [], lat: s.lat||0, lon: s.lon||0,
+        });
+      }
+      const ce = cityIndex.get(key);
+      for (const sid of (s.stopIds||[])) ce.stopIds.add(sid);
+      for (const op  of (s.operators||[])) ce.ops.add(op);
+      ce.stations.push({ name:s.name, stopIds:s.stopIds||[] });
+    }
+    // Garder uniquement les villes avec plusieurs gares
+    for (const [key, ce] of cityIndex) {
+      if (ce.stations.length < 2) cityIndex.delete(key);
+    }
+    console.log('  Autocomplétion : ' + stopsIndex.length + ' gares');
+    console.log('  Villes multi-gares : ' + cityIndex.size);
+    return;
+  }
+
+  // Fallback direct depuis stops.json si stations.json absent
+  for (const [sid, stop] of Object.entries(stops)) {
+    stopsIndex.push({ name:stop.name||sid, city:stop.name||sid, country:'FR',
+      stopIds:[sid], operators:['TGVMAX'], lat:stop.lat||0, lon:stop.lon||0 });
+  }
+  console.log('  Autocomplétion (fallback stops) : ' + stopsIndex.length + ' gares');
 }
 
-function json(res, data, status = 200) {
-  const body = JSON.stringify(data);
-  res.writeHead(status, {
-    'Content-Type':  'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': '*',
-    'Content-Length': Buffer.byteLength(body),
-  });
-  res.end(body);
-}
-
-// ─── Résolution stopIds depuis nom de ville ───────────────────────────────────
-
-function resolveStopIds(query) {
-  const q = normalize(query);
-  if (!q) return [];
-
-  // 1. Match exact sur stations.json (ville regroupée)
-  const exact = stations.find(s => normalize(s.name) === q || normalize(s.city) === q);
-  if (exact) return exact.stopIds;
-
-  // 2. Match partiel sur stations.json
-  const partial = stations.filter(s =>
-    normalize(s.name).includes(q) || normalize(s.city).includes(q)
-  );
-  if (partial.length > 0) return [...new Set(partial.flatMap(s => s.stopIds))];
-
-  // 3. Fallback : stops.json brut
-  return Object.keys(stops).filter(id => normalize(stops[id].name).includes(q));
-}
-
-// ─── Formatage d'un trip ──────────────────────────────────────────────────────
-
-function formatTrip(trip) {
-  return {
-    trip_id:    trip.trip_id,
-    train_no:   trip.train_no,
-    date:       trip.date,
-    from:       stops[trip.origin_id]?.name || trip.origin_id,
-    to:         stops[trip.dest_id]?.name   || trip.dest_id,
-    from_id:    trip.origin_id,
-    to_id:      trip.dest_id,
-    dep:        trip.dep_str,
-    arr:        trip.arr_str,
-    dep_sec:    trip.dep_time,
-    arr_sec:    trip.arr_time,
-    operator:   trip.operator,
-    train_type: trip.train_type,
-  };
-}
-
-// ─── Recherche directe ────────────────────────────────────────────────────────
-
-function findDirectTrips(fromStopIds, toStopIds, date) {
-  const fromSet = new Set(fromStopIds);
-  const toSet   = new Set(toStopIds);
-  const dayTrips = calendarIndex[date] || [];
+function searchStops(query, limit=10) {
+  const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const results = [];
+  for (const e of stopsIndex) {
+    const nom = e.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (nom.includes(q)) {
+      results.push({ type:'station', ...e });
+      if (results.length >= limit) break;
+    }
+  }
+  results.sort((a, b) => {
+    const ca = (a.city||a.name).toLowerCase(), cb = (b.city||b.name).toLowerCase();
+    return ca !== cb ? ca.localeCompare(cb,'fr') : (a.name||'').localeCompare(b.name||'','fr');
+  });
+  return results;
+}
 
-  for (const tripId of dayTrips) {
-    const t = trips[tripId];
-    if (t && fromSet.has(t.origin_id) && toSet.has(t.dest_id)) {
-      results.push(t);
+function searchCities(query) {
+  const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const results = [];
+  for (const [, ce] of cityIndex) {
+    const cn = ce.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (!cn.startsWith(q) && !cn.includes(q)) continue;
+    results.push({
+      type:'city', name:ce.city, country:ce.country, countryName:ce.countryName,
+      stopIds:[...ce.stopIds], operators:[...ce.ops].sort(),
+      stations:ce.stations, lat:ce.lat, lon:ce.lon,
+    });
+  }
+  results.sort((a, b) => {
+    const aN = a.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const bN = b.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return (aN.startsWith(q)?0:1)-(bN.startsWith(q)?0:1) || a.name.localeCompare(b.name,'fr');
+  });
+  return results;
+}
+
+// ─── Utilitaires ─────────────────────────────────────────────────────────────
+
+function secondsToHHMM(s) {
+  if (s == null) return '--:--';
+  const m = Math.floor(s / 60);
+  return String(Math.floor(m / 60) % 24).padStart(2,'0') + ':' + String(m % 60).padStart(2,'0');
+}
+
+function timeToSeconds(t) {
+  if (!t || !t.includes(':')) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return h * 3600 + m * 60;
+}
+
+function resolveStopName(stopId) {
+  for (const station of stopsIndex) {
+    if ((station.stopIds||[]).includes(stopId)) return station.name;
+  }
+  return (stops[stopId]?.name) || stopId;
+}
+
+function cityKeyOfStop(stopId) {
+  for (const s of stopsIndex) {
+    if ((s.stopIds||[]).includes(stopId)) {
+      const city    = s.city || s.name;
+      const country = s.country || 'FR';
+      return city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') + ':' + country;
+    }
+  }
+  return stopId;
+}
+
+// ─── Recherche de trajets TGVmax ──────────────────────────────────────────────
+//
+// La logique est simple : on cherche tous les trips qui :
+//  1. Partent de l'un des fromIds
+//  2. Arrivent à l'un des toIds
+//  3. Sont disponibles à la date demandée
+//  4. Partent après startTime
+//
+// Les trajets TGVmax sont TOUS directs (pas de correspondances).
+
+function getTripsForDate(dateISO) {
+  if (!dateISO) return Object.values(trips);
+  const ids = calendarIndex[dateISO] || [];
+  return ids.map(id => trips[id]).filter(Boolean);
+}
+
+function searchJourneys(fromIds, toIds, dateISO, startTimeSec, limit=8) {
+  const fromSet = new Set(fromIds);
+  const toSet   = new Set(toIds);
+
+  const dayTrips = getTripsForDate(dateISO);
+  const results  = [];
+
+  for (const trip of dayTrips) {
+    if (!fromSet.has(trip.origin_id)) continue;
+    if (!toSet.has(trip.dest_id))     continue;
+    if (trip.dep_time != null && trip.dep_time < startTimeSec) continue;
+    if (!trip.dispo) continue;
+
+    results.push({
+      trip_id:    trip.trip_id,
+      train_no:   trip.train_no,
+      date:       trip.date,
+      dep_time:   trip.dep_time,
+      arr_time:   trip.arr_time,
+      dep_str:    trip.dep_str || secondsToHHMM(trip.dep_time),
+      arr_str:    trip.arr_str || secondsToHHMM(trip.arr_time),
+      duration:   trip.dep_time != null && trip.arr_time != null
+                  ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
+      transfers:  0,
+      train_types:['TGVMAX'],
+      operator:   'TGVMAX',
+      from_id:    trip.origin_id,
+      to_id:      trip.dest_id,
+      from_name:  resolveStopName(trip.origin_id),
+      to_name:    resolveStopName(trip.dest_id),
+      legs: [{
+        from_id:    trip.origin_id,
+        to_id:      trip.dest_id,
+        from_name:  resolveStopName(trip.origin_id),
+        to_name:    resolveStopName(trip.dest_id),
+        dep_time:   trip.dep_time,
+        arr_time:   trip.arr_time,
+        dep_str:    trip.dep_str || secondsToHHMM(trip.dep_time),
+        arr_str:    trip.arr_str || secondsToHHMM(trip.arr_time),
+        trip_id:    trip.trip_id,
+        train_no:   trip.train_no,
+        operator:   'TGVMAX',
+        train_type: 'TGVMAX',
+        duration:   trip.dep_time != null && trip.arr_time != null
+                    ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
+      }],
+    });
+  }
+
+  results.sort((a, b) => (a.dep_time || 0) - (b.dep_time || 0));
+  return results.slice(0, limit);
+}
+
+// ─── Explore : toutes destinations depuis une gare ────────────────────────────
+
+function exploreDestinations(fromIds, dateISO) {
+  const fromSet = new Set(fromIds);
+  const dayTrips = getTripsForDate(dateISO);
+  const bestByDest = {};
+
+  for (const trip of dayTrips) {
+    if (!fromSet.has(trip.origin_id)) continue;
+    if (!trip.dispo) continue;
+
+    const did = trip.dest_id;
+    const dur = trip.dep_time != null && trip.arr_time != null
+      ? trip.arr_time - trip.dep_time : Infinity;
+
+    if (!bestByDest[did] || dur < bestByDest[did].duration) {
+      bestByDest[did] = {
+        trip_id:   trip.trip_id,
+        dest_id:   did,
+        dest_name: resolveStopName(did),
+        dep_str:   trip.dep_str || secondsToHHMM(trip.dep_time),
+        arr_str:   trip.arr_str || secondsToHHMM(trip.arr_time),
+        dep_time:  trip.dep_time,
+        arr_time:  trip.arr_time,
+        duration:  dur !== Infinity ? Math.round(dur / 60) : null,
+        dest_lat:  stops[did]?.lat || 0,
+        dest_lon:  stops[did]?.lon || 0,
+        train_types:['TGVMAX'],
+        transfers: 0,
+        legs: [{
+          from_id:   trip.origin_id,
+          to_id:     did,
+          from_name: resolveStopName(trip.origin_id),
+          to_name:   resolveStopName(did),
+          dep_str:   trip.dep_str || secondsToHHMM(trip.dep_time),
+          arr_str:   trip.arr_str || secondsToHHMM(trip.arr_time),
+          dep_time:  trip.dep_time,
+          arr_time:  trip.arr_time,
+          operator:  'TGVMAX',
+          train_type:'TGVMAX',
+          train_no:  trip.train_no,
+        }],
+      };
     }
   }
 
-  results.sort((a, b) => a.dep_time - b.dep_time);
-  return results;
+  return Object.values(bestByDest);
 }
 
 // ─── Recherche avec correspondances ──────────────────────────────────────────
-/**
- * Algo :
- *  1. Construire un index { stopId → [trips partant de ce stop ce jour-là] }
- *  2. Pour chaque trip depuis `from`, trouver les gares intermédiaires
- *  3. Depuis chaque gare intermédiaire, chercher les trips vers `to`
- *     en vérifiant minTransfer <= attente <= maxTransfer
- *  4. Si maxChanges = 2, répéter une fois de plus
- */
-function findTripsWithChanges(fromStopIds, toStopIds, date, opts = {}) {
+//
+// Algorithme :
+//   1. Trouver tous les trains qui partent des fromIds ce jour-là (leg 1)
+//   2. Pour chaque destination intermédiaire, trouver les trains qui repartent
+//      vers toIds avec un temps de correspondance suffisant (minTransferSec)
+//   3. Retourner les meilleures combinaisons triées par heure d'arrivée
+
+const MIN_TRANSFER_SEC_DEFAULT = 20 * 60; // 20 minutes minimum par défaut
+const MAX_TRANSFER_SEC_DEFAULT = 4 * 3600; // 4 heures max entre les deux trains
+
+function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, options = {}) {
   const {
-    maxChanges  = 1,
-    minTransfer = 30,   // minutes
-    maxTransfer = 180,  // minutes
-  } = opts;
+    minTransferSec = MIN_TRANSFER_SEC_DEFAULT,
+    maxTransferSec = MAX_TRANSFER_SEC_DEFAULT,
+    maxResults = 10,
+    viaIds = null, // forcer une gare de correspondance spécifique
+  } = options;
 
-  const minSec = minTransfer * 60;
-  const maxSec = maxTransfer * 60;
+  const fromSet = new Set(fromIds);
+  const toSet   = new Set(toIds);
+  const viaSet  = viaIds ? new Set(viaIds) : null;
 
-  const fromSet  = new Set(fromStopIds);
-  const toSet    = new Set(toStopIds);
-  const dayTrips = calendarIndex[date] || [];
+  const dayTrips = getTripsForDate(dateISO);
 
-  // Index rapide stopId → trips qui en PARTENT ce jour-là
-  const byOrigin = {};
-  for (const tripId of dayTrips) {
-    const t = trips[tripId];
-    if (!t) continue;
-    (byOrigin[t.origin_id] = byOrigin[t.origin_id] || []).push(t);
+  // Index des départs par stop_id pour accélérer la recherche du leg 2
+  const tripsByOrigin = {};
+  for (const trip of dayTrips) {
+    if (!trip.dispo) continue;
+    if (!tripsByOrigin[trip.origin_id]) tripsByOrigin[trip.origin_id] = [];
+    tripsByOrigin[trip.origin_id].push(trip);
   }
 
   const results = [];
+  const seen    = new Set(); // éviter les doublons
 
-  // ── 1 correspondance ────────────────────────────────────────────────
-  for (const tripId of dayTrips) {
-    const t1 = trips[tripId];
-    if (!t1 || !fromSet.has(t1.origin_id)) continue;
-    if (toSet.has(t1.dest_id)) continue; // direct, ignoré ici
+  for (const leg1 of dayTrips) {
+    if (!fromSet.has(leg1.origin_id)) continue;
+    if (!leg1.dispo) continue;
+    if (leg1.dep_time != null && leg1.dep_time < startTimeSec) continue;
+    // Ignorer les trips qui arrivent déjà à destination (trajet direct)
+    if (toSet.has(leg1.dest_id)) continue;
+    // Filtrer par via si spécifié
+    if (viaSet && !viaSet.has(leg1.dest_id)) continue;
 
-    for (const t2 of (byOrigin[t1.dest_id] || [])) {
-      if (!toSet.has(t2.dest_id)) continue;
-      const wait = t2.dep_time - t1.arr_time;
-      if (wait < minSec || wait > maxSec) continue;
+    const viaId = leg1.dest_id;
+    const leg1Arr = leg1.arr_time;
+    if (leg1Arr == null) continue;
+
+    // Chercher les trains leg 2 depuis la gare intermédiaire
+    const leg2Candidates = tripsByOrigin[viaId] || [];
+    for (const leg2 of leg2Candidates) {
+      if (!toSet.has(leg2.dest_id)) continue;
+      if (!leg2.dispo) continue;
+      if (leg2.dep_time == null) continue;
+
+      const transferSec = leg2.dep_time - leg1Arr;
+      if (transferSec < minTransferSec) continue;
+      if (transferSec > maxTransferSec) continue;
+
+      const key = leg1.trip_id + '|' + leg2.trip_id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const totalDuration = leg2.arr_time != null
+        ? Math.round((leg2.arr_time - leg1.dep_time) / 60) : null;
 
       results.push({
-        type:          'connection',
-        changes:       1,
-        total_dep:     t1.dep_str,
-        total_arr:     t2.arr_str,
-        total_dep_sec: t1.dep_time,
-        total_arr_sec: t2.arr_time,
-        duration_min:  Math.round((t2.arr_time - t1.dep_time) / 60),
-        transfer_min:  Math.round(wait / 60),
+        trip_id:      key,
+        date:         dateISO,
+        dep_time:     leg1.dep_time,
+        arr_time:     leg2.arr_time,
+        dep_str:      leg1.dep_str || secondsToHHMM(leg1.dep_time),
+        arr_str:      leg2.arr_str || secondsToHHMM(leg2.arr_time),
+        duration:     totalDuration,
+        transfers:    1,
+        transfer_duration: Math.round(transferSec / 60),
+        train_types:  ['TGVMAX', 'TGVMAX'],
+        operator:     'TGVMAX',
+        from_id:      leg1.origin_id,
+        to_id:        leg2.dest_id,
+        from_name:    resolveStopName(leg1.origin_id),
+        to_name:      resolveStopName(leg2.dest_id),
+        via_id:       viaId,
+        via_name:     resolveStopName(viaId),
         legs: [
-          { ...formatTrip(t1), leg: 1 },
-          { ...formatTrip(t2), leg: 2, transfer_wait_min: Math.round(wait / 60) },
+          {
+            from_id:    leg1.origin_id,
+            to_id:      viaId,
+            from_name:  resolveStopName(leg1.origin_id),
+            to_name:    resolveStopName(viaId),
+            dep_time:   leg1.dep_time,
+            arr_time:   leg1.arr_time,
+            dep_str:    leg1.dep_str || secondsToHHMM(leg1.dep_time),
+            arr_str:    leg1.arr_str || secondsToHHMM(leg1.arr_time),
+            trip_id:    leg1.trip_id,
+            train_no:   leg1.train_no,
+            operator:   'TGVMAX',
+            train_type: 'TGVMAX',
+            duration:   leg1.dep_time != null && leg1.arr_time != null
+                        ? Math.round((leg1.arr_time - leg1.dep_time) / 60) : null,
+          },
+          {
+            from_id:    viaId,
+            to_id:      leg2.dest_id,
+            from_name:  resolveStopName(viaId),
+            to_name:    resolveStopName(leg2.dest_id),
+            dep_time:   leg2.dep_time,
+            arr_time:   leg2.arr_time,
+            dep_str:    leg2.dep_str || secondsToHHMM(leg2.dep_time),
+            arr_str:    leg2.arr_str || secondsToHHMM(leg2.arr_time),
+            trip_id:    leg2.trip_id,
+            train_no:   leg2.train_no,
+            operator:   'TGVMAX',
+            train_type: 'TGVMAX',
+            duration:   leg2.dep_time != null && leg2.arr_time != null
+                        ? Math.round((leg2.arr_time - leg2.dep_time) / 60) : null,
+          },
         ],
-        via: [stops[t1.dest_id]?.name || t1.dest_id],
       });
+
+      if (results.length >= maxResults * 10) break; // coupe-circuit
     }
   }
 
-  // ── 2 correspondances ───────────────────────────────────────────────
-  if (maxChanges >= 2) {
-    for (const tripId of dayTrips) {
-      const t1 = trips[tripId];
-      if (!t1 || !fromSet.has(t1.origin_id)) continue;
-      if (toSet.has(t1.dest_id)) continue;
-
-      for (const t2 of (byOrigin[t1.dest_id] || [])) {
-        const wait1 = t2.dep_time - t1.arr_time;
-        if (wait1 < minSec || wait1 > maxSec) continue;
-        if (toSet.has(t2.dest_id)) continue; // 1 correspondance, déjà géré
-
-        for (const t3 of (byOrigin[t2.dest_id] || [])) {
-          if (!toSet.has(t3.dest_id)) continue;
-          const wait2 = t3.dep_time - t2.arr_time;
-          if (wait2 < minSec || wait2 > maxSec) continue;
-
-          results.push({
-            type:          'connection',
-            changes:       2,
-            total_dep:     t1.dep_str,
-            total_arr:     t3.arr_str,
-            total_dep_sec: t1.dep_time,
-            total_arr_sec: t3.arr_time,
-            duration_min:  Math.round((t3.arr_time - t1.dep_time) / 60),
-            transfer_min:  Math.round((wait1 + wait2) / 60),
-            legs: [
-              { ...formatTrip(t1), leg: 1 },
-              { ...formatTrip(t2), leg: 2, transfer_wait_min: Math.round(wait1 / 60) },
-              { ...formatTrip(t3), leg: 3, transfer_wait_min: Math.round(wait2 / 60) },
-            ],
-            via: [
-              stops[t1.dest_id]?.name || t1.dest_id,
-              stops[t2.dest_id]?.name || t2.dest_id,
-            ],
-          });
-        }
-      }
-    }
-  }
-
-  results.sort((a, b) =>
-    a.total_dep_sec !== b.total_dep_sec
-      ? a.total_dep_sec - b.total_dep_sec
-      : a.duration_min - b.duration_min
-  );
-
-  return results;
+  results.sort((a, b) => (a.arr_time || 0) - (b.arr_time || 0));
+  return results.slice(0, maxResults);
 }
 
-// ─── Route /search ────────────────────────────────────────────────────────────
+// ─── HTTP ─────────────────────────────────────────────────────────────────────
 
-function handleSearch(query, res) {
-  const from        = (query.from || '').trim();
-  const to          = (query.to   || '').trim();
-  const date        = (query.date || '').trim();
-  const maxChanges  = Math.min(2, Math.max(0, parseInt(query.maxChanges  ?? 1)));
-  const minTransfer = Math.max(0,             parseInt(query.minTransfer ?? 30));
-  const maxTransfer = Math.max(minTransfer,   parseInt(query.maxTransfer ?? 180));
-
-  if (!from || !to || !date) {
-    return json(res, { error: 'Paramètres requis : from, to, date (YYYY-MM-DD)' }, 400);
-  }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return json(res, { error: 'Format date invalide. Attendu : YYYY-MM-DD' }, 400);
-  }
-
-  const fromStopIds = resolveStopIds(from);
-  const toStopIds   = resolveStopIds(to);
-
-  if (!fromStopIds.length) return json(res, { error: `Gare de départ inconnue : ${from}` }, 404);
-  if (!toStopIds.length)   return json(res, { error: `Gare d'arrivée inconnue : ${to}` }, 404);
-
-  const t0 = Date.now();
-
-  // Trajets directs
-  const directTrips = findDirectTrips(fromStopIds, toStopIds, date).map(t => ({
-    type:          'direct',
-    changes:       0,
-    total_dep:     t.dep_str,
-    total_arr:     t.arr_str,
-    total_dep_sec: t.dep_time,
-    total_arr_sec: t.arr_time,
-    duration_min:  t.arr_time != null && t.dep_time != null
-                     ? Math.round((t.arr_time - t.dep_time) / 60)
-                     : null,
-    transfer_min:  0,
-    legs:          [{ ...formatTrip(t), leg: 1 }],
-    via:           [],
-  }));
-
-  // Trajets avec correspondances
-  const connectionTrips = maxChanges >= 1
-    ? findTripsWithChanges(fromStopIds, toStopIds, date, { maxChanges, minTransfer, maxTransfer })
-    : [];
-
-  const allResults = [...directTrips, ...connectionTrips]
-    .sort((a, b) => a.total_dep_sec - b.total_dep_sec);
-
-  json(res, {
-    query: {
-      from, to, date,
-      from_stop_ids: fromStopIds,
-      to_stop_ids:   toStopIds,
-      maxChanges, minTransfer, maxTransfer,
-    },
-    stats: {
-      total:       allResults.length,
-      direct:      directTrips.length,
-      connections: connectionTrips.length,
-      elapsed_ms:  Date.now() - t0,
-    },
-    results: allResults,
+function cors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+function jsonResp(res, data, status=200) {
+  cors(res);
+  res.writeHead(status, { 'Content-Type':'application/json' });
+  res.end(JSON.stringify(data));
+}
+function serveFile(res, fp) {
+  if (!fs.existsSync(fp)) { res.writeHead(404); res.end('Not found'); return; }
+  const mime = { '.html':'text/html', '.js':'application/javascript', '.css':'text/css', '.svg':'image/svg+xml' };
+  cors(res);
+  res.writeHead(200, { 'Content-Type': mime[path.extname(fp)] || 'text/plain' });
+  fs.createReadStream(fp).pipe(res);
+}
+function getBody(req) {
+  return new Promise(r => {
+    let b = '';
+    req.on('data', c => b += c);
+    req.on('end', () => { try { r(JSON.parse(b)); } catch { r({}); } });
   });
 }
 
-// ─── Route /stations ──────────────────────────────────────────────────────────
+const server = http.createServer(async (req, res) => {
+  const parsed = url.parse(req.url, true);
+  const p = parsed.pathname, q = parsed.query;
 
-function handleStations(query, res) {
-  const q = normalize(query.q || '');
-  if (!q || q.length < 2) {
-    return json(res, { error: 'Paramètre q requis (min 2 caractères)' }, 400);
-  }
-  const matches = stations
-    .filter(s => normalize(s.name).includes(q) || normalize(s.city).includes(q))
-    .slice(0, 20)
-    .map(s => ({ name: s.name, city: s.city, country: s.country, stopIds: s.stopIds, lat: s.lat, lon: s.lon }));
+  if (req.method === 'OPTIONS') { cors(res); res.writeHead(204); res.end(); return; }
 
-  json(res, { query: query.q, count: matches.length, results: matches });
-}
-
-// ─── Route /health ────────────────────────────────────────────────────────────
-
-function handleHealth(res) {
-  json(res, {
-    status:     'ok',
-    trips:      Object.keys(trips).length,
-    stops:      Object.keys(stops).length,
-    stations:   stations.length,
-    date_range: meta.date_range,
-    generated:  meta.generated_at,
-  });
-}
-
-// ─── Serveur HTTP ─────────────────────────────────────────────────────────────
-
-const server = http.createServer((req, res) => {
-  const parsed   = url.parse(req.url, true);
-  const pathname = parsed.pathname.replace(/\/$/, '') || '/';
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, { 'Access-Control-Allow-Origin': '*' });
-    return res.end();
-  }
-  if (req.method !== 'GET') {
-    return json(res, { error: 'Méthode non supportée' }, 405);
-  }
-
-  try {
-    if (pathname === '/search')   return handleSearch(parsed.query, res);
-    if (pathname === '/stations') return handleStations(parsed.query, res);
-    if (pathname === '/health')   return handleHealth(res);
-
-    json(res, {
-      message:   'TGVmax Engine',
-      endpoints: [
-        'GET /search?from=Paris&to=Lyon&date=YYYY-MM-DD[&maxChanges=1][&minTransfer=30][&maxTransfer=180]',
-        'GET /stations?q=paris',
-        'GET /health',
-      ],
+  // ── Ping keep-alive ──
+  if (p === '/eveille') {
+    return jsonResp(res, {
+      ok:        true,
+      ready:     engineReady,
+      uptime_s:  Math.floor(process.uptime()),
+      loaded_at: engineLoadedAt,
+      load_ms:   engineLoadMs,
+      message:   engineReady ? '✅ Moteur TGVmax opérationnel' : '⏳ Chargement en cours…',
     });
-  } catch (err) {
-    console.error('Erreur requête:', err);
-    json(res, { error: 'Erreur interne', detail: err.message }, 500);
   }
+
+  // ── Bloquer les API tant que l'engine charge ──
+  if (p.startsWith('/api/') && !engineReady) {
+    return jsonResp(res, {
+      error:   'Serveur en cours de démarrage, réessayez dans quelques secondes.',
+      ready:   false,
+      load_ms: engineLoadMs,
+    }, 503);
+  }
+
+  // ── /api/meta ──
+  if (p === '/api/meta') {
+    if (!engineReady) return jsonResp(res, { warming: true }, 503);
+    return jsonResp(res, meta);
+  }
+
+  // ── /api/stops ──
+  if (p === '/api/stops') {
+    const qs = (q.q || '').trim();
+    return jsonResp(res, qs ? searchStops(qs, 10) : []);
+  }
+
+  // ── /api/cities ──
+  if (p === '/api/cities') {
+    const qs = (q.q || '').trim();
+    if (!qs || qs.length < 2) return jsonResp(res, []);
+    return jsonResp(res, searchCities(qs));
+  }
+
+  // ── /api/search ──
+  if (p === '/api/search') {
+    const t0       = Date.now();
+    const fromIds  = (q.from  || '').split(',').filter(Boolean);
+    const toIds    = (q.to    || '').split(',').filter(Boolean);
+    const dateStr  = (q.date  || '').trim();
+    const timeStr  = (q.time  || '00:00').trim();
+    const limit    = Math.min(parseInt(q.limit || '8'), 50);
+    const offset   = parseInt(q.offset || '0');
+    const afterDep = parseInt(q.after_dep || '0');
+
+    if (!fromIds.length || !toIds.length) {
+      return jsonResp(res, { error: 'Paramètres from et to requis' }, 400);
+    }
+
+    const startSec = Math.max(timeToSeconds(timeStr) + offset, afterDep || 0);
+
+    console.log('\n[SEARCH TGVmax]', dateStr || 'sans date', timeStr);
+    console.log('  from:', fromIds.join(','), '→ to:', toIds.join(','));
+
+    const journeys  = searchJourneys(fromIds, toIds, dateStr, startSec, limit);
+    const lastDep   = journeys.length ? Math.max(...journeys.map(j => j.dep_time||0)) : startSec;
+    const nextOffset = lastDep - timeToSeconds(timeStr);
+
+    console.log('  Résultats :', journeys.length);
+
+    return jsonResp(res, {
+      journeys,
+      computed_ms:  Date.now() - t0,
+      next_offset:  nextOffset,
+      last_dep_time: lastDep,
+    });
+  }
+
+  // ── /api/transfer ──
+  if (p === '/api/transfer') {
+    const t0        = Date.now();
+    const fromIds   = (q.from  || '').split(',').filter(Boolean);
+    const toIds     = (q.to    || '').split(',').filter(Boolean);
+    const viaIds    = q.via ? q.via.split(',').filter(Boolean) : null;
+    const dateStr   = (q.date  || '').trim();
+    const timeStr   = (q.time  || '00:00').trim();
+    const limit     = Math.min(parseInt(q.limit || '10'), 50);
+    const minTrans  = parseInt(q.min_transfer || '20') * 60;  // en secondes
+    const maxTrans  = parseInt(q.max_transfer || '240') * 60; // en secondes
+
+    if (!fromIds.length || !toIds.length) {
+      return jsonResp(res, { error: 'Paramètres from et to requis' }, 400);
+    }
+    if (!dateStr) {
+      return jsonResp(res, { error: 'Paramètre date requis (YYYY-MM-DD)' }, 400);
+    }
+
+    const startSec = timeToSeconds(timeStr);
+    console.log('\n[TRANSFER TGVmax]', dateStr, timeStr);
+    console.log('  from:', fromIds.join(','), '→ to:', toIds.join(','), viaIds ? '| via: ' + viaIds.join(',') : '');
+
+    const journeys = searchJourneysWithTransfer(fromIds, toIds, dateStr, startSec, {
+      minTransferSec: minTrans,
+      maxTransferSec: maxTrans,
+      maxResults:     limit,
+      viaIds,
+    });
+
+    console.log(`  → ${journeys.length} correspondances | ${Date.now()-t0}ms`);
+    return jsonResp(res, { journeys, computed_ms: Date.now()-t0 });
+  }
+
+  // ── /api/explore ──
+  if (p === '/api/explore') {
+    const t0      = Date.now();
+    const fromIds = (q.from || '').split(',').filter(Boolean);
+    const dateStr = (q.date || '').trim();
+
+    if (!fromIds.length) return jsonResp(res, { error: 'Paramètre from requis' }, 400);
+
+    console.log('\n[EXPLORE TGVmax]', dateStr || 'sans date', '| from:', fromIds.join(','));
+
+    const journeys = exploreDestinations(fromIds, dateStr);
+
+    console.log(`  → ${journeys.length} destinations | ${Date.now()-t0}ms`);
+    return jsonResp(res, { journeys, computed_ms: Date.now()-t0 });
+  }
+
+  // ── /api/debug/trips ──
+  if (p === '/api/debug/trips') {
+    const stopId  = q.stop  || '';
+    const dateISO = q.date  || '';
+    const trainNo = q.train || '';
+
+    if (trainNo) {
+      const found = Object.values(trips).filter(t => t.train_no === trainNo);
+      return jsonResp(res, { train_no: trainNo, trips: found });
+    }
+
+    if (stopId) {
+      const tripIds = (routesByStop[stopId] || []);
+      const filtered = dateISO
+        ? tripIds.filter(id => trips[id]?.date === dateISO)
+        : tripIds;
+      const out = filtered
+        .map(id => trips[id])
+        .filter(Boolean)
+        .sort((a, b) => (a.dep_time||0) - (b.dep_time||0))
+        .map(t => ({
+          trip_id:  t.trip_id,
+          train_no: t.train_no,
+          date:     t.date,
+          from:     resolveStopName(t.origin_id),
+          to:       resolveStopName(t.dest_id),
+          dep:      t.dep_str || secondsToHHMM(t.dep_time),
+          arr:      t.arr_str || secondsToHHMM(t.arr_time),
+          dispo:    t.dispo,
+        }));
+      return jsonResp(res, { stop: stopId, stop_name: resolveStopName(stopId), date: dateISO||'tous', departures: out });
+    }
+
+    return jsonResp(res, { error: 'Param stop= ou train= requis. Ex: /api/debug/trips?stop=TGVMAX:paris&date=2026-03-15' }, 400);
+  }
+
+  // ── Fichiers statiques ──
+  const staticMap = { '/':'index.html', '/index.html':'index.html', '/trajets.html':'trajets.html' };
+  if (staticMap[p]) return serveFile(res, path.join(__dirname, staticMap[p]));
+
+  const assetPath = path.join(__dirname, p);
+  if (fs.existsSync(assetPath) && fs.statSync(assetPath).isFile()) return serveFile(res, assetPath);
+
+  res.writeHead(404); res.end('Not found');
 });
 
+// ─── Démarrage ────────────────────────────────────────────────────────────────
+
 server.listen(PORT, () => {
-  console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
-  console.log(`   Exemples :`);
-  console.log(`   /search?from=Caen&to=Lyon&date=2025-06-15&maxChanges=1&minTransfer=30`);
-  console.log(`   /search?from=Caen&to=Nice&date=2025-06-15&maxChanges=2&minTransfer=45\n`);
+  console.log('🌐 http://localhost:' + PORT + '  (moteur en cours de chargement…)');
+  try {
+    initEngine();
+  } catch (err) {
+    engineError = err.message;
+    console.error('❌ Échec chargement moteur :', err);
+  }
 });
