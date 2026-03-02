@@ -1,0 +1,14 @@
+{
+  "name": "tgvmax-engine",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node tgvmax-ingest.js && node build-stations-index.js",
+    "start": "node --max-old-space-size=450 server.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
