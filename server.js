@@ -27,7 +27,8 @@ const PORT     = process.env.PORT     || 3000;
 let trips         = {};  // trip_id → trip object
 let stops         = {};  // stop_id → { name, lat, lon }
 let routesByStop  = {};  // stop_id → [trip_ids]
-let calendarIndex = {};  // date ISO → [trip_ids]
+let calendarIndex = {};  // date ISO → [trip_ids]  (dispo uniquement, tel que généré par l'ingest)
+let allCalendarIndex = {}; // date ISO → [trip_ids]  (TOUS les trips, construit au chargement)
 let meta          = {};
 
 let stopsIndex = [];   // pour l'autocomplétion
@@ -58,6 +59,15 @@ function initEngine() {
   routesByStop  = loadJSON('routes_by_stop.json');
   calendarIndex = loadJSON('calendar_index.json');
   meta          = loadJSON('meta.json');
+
+  // Construire un index date → [trip_ids] pour TOUS les trips (dispo ou non)
+  allCalendarIndex = {};
+  for (const [tripId, trip] of Object.entries(trips)) {
+    if (!trip.date) continue;
+    if (!allCalendarIndex[trip.date]) allCalendarIndex[trip.date] = [];
+    allCalendarIndex[trip.date].push(tripId);
+  }
+  console.log('  Index all-trips : ' + Object.keys(allCalendarIndex).length + ' dates');
 
   buildStopsIndex();
 
@@ -193,7 +203,7 @@ function cityKeyOfStop(stopId) {
 
 function getTripsForDate(dateISO) {
   if (!dateISO) return Object.values(trips);
-  const ids = calendarIndex[dateISO] || [];
+  const ids = allCalendarIndex[dateISO] || [];
   return ids.map(id => trips[id]).filter(Boolean);
 }
 
@@ -534,15 +544,22 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // Supprimer les correspondances redondantes :
+    // si l'un des legs utilise un train_no qui existe déjà en direct, on l'élimine
+    const directTrainNos = new Set(directJourneys.map(j => j.train_no).filter(Boolean));
+    const filteredTransfers = transferJourneys.filter(j =>
+      !j.legs.some(leg => directTrainNos.has(leg.train_no))
+    );
+
     // Fusionner et trier par heure de départ, directs en priorité en cas d'égalité
-    const allJourneys = [...directJourneys, ...transferJourneys]
+    const allJourneys = [...directJourneys, ...filteredTransfers]
       .sort((a, b) => (a.dep_time || 0) - (b.dep_time || 0) || a.transfers - b.transfers)
       .slice(0, limit);
 
     const lastDep    = allJourneys.length ? Math.max(...allJourneys.map(j => j.dep_time||0)) : startSec;
     const nextOffset = lastDep - timeToSeconds(timeStr);
 
-    console.log(`  Résultats : ${directJourneys.length} directs + ${transferJourneys.length} correspondances = ${allJourneys.length} total`);
+    console.log(`  Résultats : ${directJourneys.length} directs + ${filteredTransfers.length} correspondances (${transferJourneys.length - filteredTransfers.length} redondantes supprimées) = ${allJourneys.length} total`);
 
     return jsonResp(res, {
       journeys:      allJourneys,
