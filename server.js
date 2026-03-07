@@ -208,25 +208,25 @@ function searchJourneys(fromIds, toIds, dateISO, startTimeSec, limit=8) {
     if (!fromSet.has(trip.origin_id)) continue;
     if (!toSet.has(trip.dest_id))     continue;
     if (trip.dep_time != null && trip.dep_time < startTimeSec) continue;
-    if (!trip.dispo) continue;
 
     results.push({
-      trip_id:    trip.trip_id,
-      train_no:   trip.train_no,
-      date:       trip.date,
-      dep_time:   trip.dep_time,
-      arr_time:   trip.arr_time,
-      dep_str:    trip.dep_str || secondsToHHMM(trip.dep_time),
-      arr_str:    trip.arr_str || secondsToHHMM(trip.arr_time),
-      duration:   trip.dep_time != null && trip.arr_time != null
-                  ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
-      transfers:  0,
-      train_types:['TGVMAX'],
-      operator:   'TGVMAX',
-      from_id:    trip.origin_id,
-      to_id:      trip.dest_id,
-      from_name:  resolveStopName(trip.origin_id),
-      to_name:    resolveStopName(trip.dest_id),
+      trip_id:       trip.trip_id,
+      train_no:      trip.train_no,
+      date:          trip.date,
+      dep_time:      trip.dep_time,
+      arr_time:      trip.arr_time,
+      dep_str:       trip.dep_str || secondsToHHMM(trip.dep_time),
+      arr_str:       trip.arr_str || secondsToHHMM(trip.arr_time),
+      duration:      trip.dep_time != null && trip.arr_time != null
+                     ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
+      transfers:     0,
+      train_types:   ['INOUI'],
+      operator:      'TGVMAX',
+      od_happy_card: trip.dispo ? 'oui' : 'non',
+      from_id:       trip.origin_id,
+      to_id:         trip.dest_id,
+      from_name:     resolveStopName(trip.origin_id),
+      to_name:       resolveStopName(trip.dest_id),
       legs: [{
         from_id:    trip.origin_id,
         to_id:      trip.dest_id,
@@ -239,7 +239,7 @@ function searchJourneys(fromIds, toIds, dateISO, startTimeSec, limit=8) {
         trip_id:    trip.trip_id,
         train_no:   trip.train_no,
         operator:   'TGVMAX',
-        train_type: 'TGVMAX',
+        train_type: 'INOUI',
         duration:   trip.dep_time != null && trip.arr_time != null
                     ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
       }],
@@ -327,7 +327,6 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
   // Index des départs par stop_id pour accélérer la recherche du leg 2
   const tripsByOrigin = {};
   for (const trip of dayTrips) {
-    if (!trip.dispo) continue;
     if (!tripsByOrigin[trip.origin_id]) tripsByOrigin[trip.origin_id] = [];
     tripsByOrigin[trip.origin_id].push(trip);
   }
@@ -352,7 +351,6 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
     const leg2Candidates = tripsByOrigin[viaId] || [];
     for (const leg2 of leg2Candidates) {
       if (!toSet.has(leg2.dest_id)) continue;
-      if (!leg2.dispo) continue;
       if (leg2.dep_time == null) continue;
 
       const transferSec = leg2.dep_time - leg1Arr;
@@ -366,24 +364,28 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
       const totalDuration = leg2.arr_time != null
         ? Math.round((leg2.arr_time - leg1.dep_time) / 60) : null;
 
+      // La correspondance est dispo seulement si les deux legs le sont
+      const bothDispo = leg1.dispo && leg2.dispo;
+
       results.push({
-        trip_id:      key,
-        date:         dateISO,
-        dep_time:     leg1.dep_time,
-        arr_time:     leg2.arr_time,
-        dep_str:      leg1.dep_str || secondsToHHMM(leg1.dep_time),
-        arr_str:      leg2.arr_str || secondsToHHMM(leg2.arr_time),
-        duration:     totalDuration,
-        transfers:    1,
+        trip_id:           key,
+        date:              dateISO,
+        dep_time:          leg1.dep_time,
+        arr_time:          leg2.arr_time,
+        dep_str:           leg1.dep_str || secondsToHHMM(leg1.dep_time),
+        arr_str:           leg2.arr_str || secondsToHHMM(leg2.arr_time),
+        duration:          totalDuration,
+        transfers:         1,
         transfer_duration: Math.round(transferSec / 60),
-        train_types:  ['TGVMAX', 'TGVMAX'],
-        operator:     'TGVMAX',
-        from_id:      leg1.origin_id,
-        to_id:        leg2.dest_id,
-        from_name:    resolveStopName(leg1.origin_id),
-        to_name:      resolveStopName(leg2.dest_id),
-        via_id:       viaId,
-        via_name:     resolveStopName(viaId),
+        train_types:       ['INOUI', 'INOUI'],
+        operator:          'TGVMAX',
+        od_happy_card:     bothDispo ? 'oui' : 'non',
+        from_id:           leg1.origin_id,
+        to_id:             leg2.dest_id,
+        from_name:         resolveStopName(leg1.origin_id),
+        to_name:           resolveStopName(leg2.dest_id),
+        via_id:            viaId,
+        via_name:          resolveStopName(viaId),
         legs: [
           {
             from_id:    leg1.origin_id,
@@ -397,7 +399,7 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
             trip_id:    leg1.trip_id,
             train_no:   leg1.train_no,
             operator:   'TGVMAX',
-            train_type: 'TGVMAX',
+            train_type: 'INOUI',
             duration:   leg1.dep_time != null && leg1.arr_time != null
                         ? Math.round((leg1.arr_time - leg1.dep_time) / 60) : null,
           },
@@ -413,7 +415,7 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
             trip_id:    leg2.trip_id,
             train_no:   leg2.train_no,
             operator:   'TGVMAX',
-            train_type: 'TGVMAX',
+            train_type: 'INOUI',
             duration:   leg2.dep_time != null && leg2.arr_time != null
                         ? Math.round((leg2.arr_time - leg2.dep_time) / 60) : null,
           },
@@ -521,16 +523,31 @@ const server = http.createServer(async (req, res) => {
     console.log('\n[SEARCH TGVmax]', dateStr || 'sans date', timeStr);
     console.log('  from:', fromIds.join(','), '→ to:', toIds.join(','));
 
-    const journeys  = searchJourneys(fromIds, toIds, dateStr, startSec, limit);
-    const lastDep   = journeys.length ? Math.max(...journeys.map(j => j.dep_time||0)) : startSec;
+    // Trajets directs
+    const directJourneys = searchJourneys(fromIds, toIds, dateStr, startSec, limit);
+
+    // Trajets avec correspondance (seulement si date fournie)
+    let transferJourneys = [];
+    if (dateStr) {
+      transferJourneys = searchJourneysWithTransfer(fromIds, toIds, dateStr, startSec, {
+        maxResults: limit,
+      });
+    }
+
+    // Fusionner et trier par heure de départ, directs en priorité en cas d'égalité
+    const allJourneys = [...directJourneys, ...transferJourneys]
+      .sort((a, b) => (a.dep_time || 0) - (b.dep_time || 0) || a.transfers - b.transfers)
+      .slice(0, limit);
+
+    const lastDep    = allJourneys.length ? Math.max(...allJourneys.map(j => j.dep_time||0)) : startSec;
     const nextOffset = lastDep - timeToSeconds(timeStr);
 
-    console.log('  Résultats :', journeys.length);
+    console.log(`  Résultats : ${directJourneys.length} directs + ${transferJourneys.length} correspondances = ${allJourneys.length} total`);
 
     return jsonResp(res, {
-      journeys,
-      computed_ms:  Date.now() - t0,
-      next_offset:  nextOffset,
+      journeys:      allJourneys,
+      computed_ms:   Date.now() - t0,
+      next_offset:   nextOffset,
       last_dep_time: lastDep,
     });
   }
