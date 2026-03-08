@@ -1,0 +1,14 @@
+name: Update TGVmax Daily
+
+on:
+  schedule:
+    - cron: '30 7 * * *'  # Chaque jour à 7h30 UTC (données SNCF mises à jour vers 6h20)
+  workflow_dispatch:        # Permet aussi de le lancer manuellement
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render redeploy (TGVmax)
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL_TGVMAX }}"

@@ -4,15 +4,20 @@
  * Télécharge l'intégralité des données TGVmax via l'endpoint d'export JSON
  * de l'API open data SNCF, puis génère les fichiers engine_data/.
  *
+ * CHANGEMENT v2 : tous les trajets sont désormais stockés (dispo ET non dispo)
+ * avec un champ `dispo: true | false`. Le calendar_index.json ne contient
+ * que les trips disponibles (pour la compatibilité), mais allCalendarIndex
+ * est reconstruit au démarrage du serveur depuis trips.json.
+ *
  * Usage :
  *   node tgvmax-ingest.js
  *   node tgvmax-ingest.js ./operators.json ./engine_data
  *
  * Fichiers générés dans engine_data/ :
- *   trips.json           — trajets indexés par trip_id
+ *   trips.json           — TOUS les trajets (dispo + non dispo), indexés par trip_id
  *   stops.json           — gares avec coordonnées
- *   routes_by_stop.json  — stop_id → [trip_ids]
- *   calendar_index.json  — date ISO → [trip_ids]
+ *   routes_by_stop.json  — stop_id → [trip_ids]  (tous les trips)
+ *   calendar_index.json  — date ISO → [trip_ids] (DISPONIBLES uniquement, compat)
  *   meta.json            — métadonnées de l'ingestion
  */
 
@@ -45,7 +50,6 @@ function downloadJson(exportUrl) {
 
       mod.get(targetUrl, { headers: { 'Accept': 'application/json' } }, (res) => {
 
-        // Gestion des redirections 301/302
         if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
           console.log('  Redirection → ' + res.headers.location);
           return doRequest(res.headers.location, redirectCount + 1);
@@ -119,27 +123,39 @@ function slugify(name) {
 }
 
 // ─── Construction des structures engine_data ──────────────────────────────────
+//
+// CHANGEMENT v2 : on ne filtre PLUS les non-dispo.
+// Tous les trips sont stockés avec dispo: true | false.
+// calendar_index reste limité aux dispo pour la compat avec servermax.js.
 
 function buildEngineData(records) {
   const trips        = {};
   const stops        = {};
   const routesByStop = {};
-  const calendarIdx  = {};
+  const calendarIdx  = {};  // dispo uniquement (compat)
 
-  let skipped  = 0;
-  let nonDispo = 0;
+  let skipped       = 0;
+  let countDispo    = 0;
+  let countNonDispo = 0;
+
+  // On peut avoir des doublons (même train, même OD, même date) avec dispo OUI et NON.
+  // On traite d'abord tous les enregistrements et on résout le conflit à la fin :
+  // si au moins un enregistrement dit OUI → dispo = true.
+  const tripDispoVotes = {}; // tripId → boolean (true si au moins un OUI)
 
   for (const raw of records) {
     const r = normalizeRecord(raw);
 
     if (!r.date || !r.origin || !r.dest || !r.dep || !r.arr) { skipped++; continue; }
-    if (r.dispo !== 'OUI') { nonDispo++; continue; }
+
+    const isDispoOui = r.dispo === 'OUI';
+    if (isDispoOui) countDispo++; else countNonDispo++;
 
     const originId = 'TGVMAX:' + slugify(r.origin);
     const destId   = 'TGVMAX:' + slugify(r.dest);
     const tripId   = `TGVMAX:${r.date}:${r.trainNo || slugify(r.origin)}:${r.dep.replace(':', '')}:${slugify(r.dest)}`;
 
-    // Gares
+    // Gares — on les enregistre qu'elles soient dispo ou non
     if (!stops[originId]) {
       stops[originId] = { name: r.origin, lat: r.lat_orig, lon: r.lon_orig };
     } else if (!stops[originId].lat && r.lat_orig) {
@@ -154,7 +170,7 @@ function buildEngineData(records) {
     const depSec = timeToSeconds(r.dep);
     const arrSec = timeToSeconds(r.arr);
 
-    // Trip
+    // Trip — on crée l'entrée pour dispo ET non dispo
     if (!trips[tripId]) {
       trips[tripId] = {
         trip_id:    tripId,
@@ -166,29 +182,43 @@ function buildEngineData(records) {
         arr_time:   arrSec,
         dep_str:    r.dep,
         arr_str:    r.arr,
-        dispo:      true,
+        dispo:      isDispoOui,  // sera réajusté si doublon ci-dessous
         operator:   'TGVMAX',
         train_type: 'TGVMAX',
       };
+      tripDispoVotes[tripId] = isDispoOui;
+    } else {
+      // En cas de doublon : si l'un dit OUI, le trip est dispo
+      if (isDispoOui) {
+        trips[tripId].dispo = true;
+        tripDispoVotes[tripId] = true;
+      }
     }
 
-    // Index routesByStop
+    // Index routesByStop (tous les trips, dispo ou non)
     if (!routesByStop[originId]) routesByStop[originId] = new Set();
     if (!routesByStop[destId])   routesByStop[destId]   = new Set();
     routesByStop[originId].add(tripId);
     routesByStop[destId].add(tripId);
 
-    // Index calendrier
-    if (!calendarIdx[r.date]) calendarIdx[r.date] = [];
-    if (!calendarIdx[r.date].includes(tripId)) calendarIdx[r.date].push(tripId);
+    // calendar_index : uniquement les dispo (compat servermax)
+    if (isDispoOui) {
+      if (!calendarIdx[r.date]) calendarIdx[r.date] = [];
+      if (!calendarIdx[r.date].includes(tripId)) calendarIdx[r.date].push(tripId);
+    }
   }
 
   const routesByStopSerial = {};
   for (const [sid, set] of Object.entries(routesByStop)) routesByStopSerial[sid] = [...set];
 
+  const totalTrips   = Object.keys(trips).length;
+  const dispoTrips   = Object.values(trips).filter(t => t.dispo).length;
+  const nonDispoTrips = totalTrips - dispoTrips;
+
   console.log(`  Total enregistrements reçus    : ${records.length.toLocaleString()}`);
-  console.log(`  Trajets TGVmax disponibles     : ${Object.keys(trips).length.toLocaleString()}`);
-  console.log(`  Non disponibles (filtrés)      : ${nonDispo.toLocaleString()}`);
+  console.log(`  Trajets stockés (total)        : ${totalTrips.toLocaleString()}`);
+  console.log(`    ✅ Disponibles               : ${dispoTrips.toLocaleString()}`);
+  console.log(`    ❌ Non disponibles           : ${nonDispoTrips.toLocaleString()}`);
   console.log(`  Enregistrements incomplets     : ${skipped}`);
   console.log(`  Gares                          : ${Object.keys(stops).length.toLocaleString()}`);
   console.log(`  Jours couverts                 : ${Object.keys(calendarIdx).length}`);
@@ -200,7 +230,8 @@ function buildEngineData(records) {
 
 async function main() {
   console.log('╔══════════════════════════════════════════════════════╗');
-  console.log('║  TGVmax Ingest — Export JSON SNCF open data          ║');
+  console.log('║  TGVmax Ingest v2 — Export JSON SNCF open data       ║');
+  console.log('║  Stockage : TOUS les trajets (dispo + non dispo)     ║');
   console.log('╚══════════════════════════════════════════════════════╝\n');
   console.time('Total');
 
@@ -212,7 +243,6 @@ async function main() {
     if (op?.export_url) {
       exportUrl = op.export_url;
     } else if (op?.api_url) {
-      // Convertir automatiquement l'URL /records en /exports/json
       exportUrl = op.api_url.replace('/records', '/exports/json') + '?limit=-1&timezone=Europe%2FParis';
     }
   }
@@ -226,7 +256,6 @@ async function main() {
     process.exit(1);
   }
 
-  // Afficher un exemple pour vérifier les noms de champs
   console.log('── Exemple d\'enregistrement ──────────────────────────');
   console.log(JSON.stringify(records[0], null, 2));
   console.log('');
@@ -249,29 +278,37 @@ async function main() {
   writeJSON('routes_by_stop.json', routesByStop);
   writeJSON('calendar_index.json', calendarIndex);
 
-  const sortedDates = Object.keys(calendarIndex).sort();
+  const sortedDates  = Object.keys(calendarIndex).sort();
+  const totalTrips   = Object.keys(trips).length;
+  const dispoTrips   = Object.values(trips).filter(t => t.dispo).length;
+
   const meta = {
-    generated_at:  new Date().toISOString(),
-    source:        exportUrl,
-    operator:      'TGVMAX',
-    total_records: records.length,
-    total_trips:   Object.keys(trips).length,
-    total_stops:   Object.keys(stops).length,
+    generated_at:    new Date().toISOString(),
+    source:          exportUrl,
+    operator:        'TGVMAX',
+    version:         2,
+    total_records:   records.length,
+    total_trips:     totalTrips,
+    trips_dispo:     dispoTrips,
+    trips_non_dispo: totalTrips - dispoTrips,
+    total_stops:     Object.keys(stops).length,
     date_range: {
-      first: sortedDates[0]                       || null,
-      last:  sortedDates[sortedDates.length - 1]  || null,
+      first: sortedDates[0]                      || null,
+      last:  sortedDates[sortedDates.length - 1] || null,
       count: sortedDates.length,
     },
   };
   writeJSON('meta.json', meta);
 
   console.log('\n══ Résumé ════════════════════════════════════════════');
-  console.log(`  Trajets dispo : ${meta.total_trips.toLocaleString()}`);
-  console.log(`  Gares         : ${meta.total_stops.toLocaleString()}`);
-  console.log(`  Dates         : ${meta.date_range.first} → ${meta.date_range.last}`);
+  console.log(`  Trajets total       : ${totalTrips.toLocaleString()}`);
+  console.log(`    ✅ Disponibles    : ${dispoTrips.toLocaleString()}`);
+  console.log(`    ❌ Non disponibles: ${(totalTrips - dispoTrips).toLocaleString()}`);
+  console.log(`  Gares               : ${meta.total_stops.toLocaleString()}`);
+  console.log(`  Dates               : ${meta.date_range.first} → ${meta.date_range.last}`);
   console.timeEnd('Total');
   console.log('\n→ Lancez ensuite : node build-stations-index.js');
-  console.log('→ Puis          : node server.js\n');
+  console.log('→ Puis          : node servermax.js\n');
 }
 
 main().catch(err => { console.error('\n❌ Erreur :', err.message); process.exit(1); });
