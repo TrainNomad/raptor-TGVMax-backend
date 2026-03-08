@@ -8,7 +8,7 @@
     "ingest": "node tgvmax-ingest.js",
     "stations": "node build-stations-index.js",
     "build": "node tgvmax-ingest.js && node build-stations-index.js",
-    "start": "node --max-old-space-size=450 servermax.js",
+    "start": "node --max-old-space-size=450 server.js",
     "start:full": "node --max-old-space-size=600 server-fusion.js"
   },
   "dependencies": {
