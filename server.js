@@ -180,6 +180,18 @@ function resolveStopName(stopId) {
   return (stops[stopId]?.name) || stopId;
 }
 
+function resolveStopCoords(stopId) {
+  // Cherche d'abord dans stopsIndex (stations.json) qui a les vraies coords
+  for (const station of stopsIndex) {
+    if ((station.stopIds||[]).includes(stopId) && station.lat && station.lon) {
+      return { lat: station.lat, lon: station.lon };
+    }
+  }
+  // Fallback stops.json brut
+  const s = stops[stopId];
+  return { lat: s?.lat || 0, lon: s?.lon || 0 };
+}
+
 function cityKeyOfStop(stopId) {
   for (const s of stopsIndex) {
     if ((s.stopIds||[]).includes(stopId)) {
@@ -285,8 +297,8 @@ function exploreDestinations(fromIds, dateISO) {
         dep_time:  trip.dep_time,
         arr_time:  trip.arr_time,
         duration:  dur !== Infinity ? Math.round(dur / 60) : null,
-        dest_lat:  stops[did]?.lat || 0,
-        dest_lon:  stops[did]?.lon || 0,
+        dest_lat:  resolveStopCoords(did).lat,
+        dest_lon:  resolveStopCoords(did).lon,
         train_types:['TGVMAX'],
         transfers: 0,
         legs: [{
