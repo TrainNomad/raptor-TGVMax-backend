@@ -21,13 +21,15 @@
  *   meta.json            — métadonnées de l'ingestion
  */
 
-const fs    = require('fs');
-const path  = require('path');
-const https = require('https');
-const http  = require('http');
+const fs      = require('fs');
+const path    = require('path');
+const https   = require('https');
+const http    = require('http');
+const matcher = require('./stations-matcher');
 
-const OPS_FILE = process.argv[2] || './operators.json';
-const OUT_DIR  = process.argv[3] || './engine_data';
+const OPS_FILE  = process.argv[2] || './operators.json';
+const OUT_DIR   = process.argv[3] || './engine_data';
+const CSV_FILE  = process.argv[4] || path.join(__dirname, 'stations.csv');
 
 // URL d'export JSON complet (limit=-1 = pas de limite, retourne tout le dataset)
 const EXPORT_URL = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/tgvmax/exports/json?limit=-1&timezone=Europe%2FParis';
@@ -128,6 +130,18 @@ function slugify(name) {
 // Tous les trips sont stockés avec dispo: true | false.
 // calendar_index reste limité aux dispo pour la compat avec servermax.js.
 
+// ─── Résolution d'une gare TGVmax → ID SNCF canonique ────────────────────────
+
+function resolveStop(rawName, latFallback, lonFallback) {
+  // 1. Essayer le matcher CSV
+  const found = matcher.match(rawName);
+  if (found) return { id: found.id, name: found.name, lat: found.lat, lon: found.lon };
+
+  // 2. Fallback : garder le slug TGVMAX avec le nom brut normalisé
+  const id = 'TGVMAX:' + slugify(rawName);
+  return { id, name: rawName, lat: latFallback || 0, lon: lonFallback || 0 };
+}
+
 function buildEngineData(records) {
   const trips        = {};
   const stops        = {};
@@ -135,8 +149,8 @@ function buildEngineData(records) {
   const calendarIdx  = {};  // dispo uniquement (compat)
 
   let skipped       = 0;
-  let countDispo    = 0;
-  let countNonDispo = 0;
+  let matchedByCSV  = 0;
+  let matchedBySlug = 0;
 
   // On peut avoir des doublons (même train, même OD, même date) avec dispo OUI et NON.
   // On traite d'abord tous les enregistrements et on résout le conflit à la fin :
@@ -149,22 +163,28 @@ function buildEngineData(records) {
     if (!r.date || !r.origin || !r.dest || !r.dep || !r.arr) { skipped++; continue; }
 
     const isDispoOui = r.dispo === 'OUI';
-    if (isDispoOui) countDispo++; else countNonDispo++;
 
-    const originId = 'TGVMAX:' + slugify(r.origin);
-    const destId   = 'TGVMAX:' + slugify(r.dest);
+    // Résolution des gares via le matcher CSV
+    const orig = resolveStop(r.origin, r.lat_orig, r.lon_orig);
+    const dest = resolveStop(r.dest,   r.lat_dest, r.lon_dest);
+
+    const originId = orig.id;
+    const destId   = dest.id;
+
+    if (orig.id.startsWith('FR')) matchedByCSV++;  else matchedBySlug++;
+
     const tripId   = `TGVMAX:${r.date}:${r.trainNo || slugify(r.origin)}:${r.dep.replace(':', '')}:${slugify(r.dest)}`;
 
-    // Gares — on les enregistre qu'elles soient dispo ou non
+    // Gares — on utilise le nom et les coords du CSV si disponible
     if (!stops[originId]) {
-      stops[originId] = { name: r.origin, lat: r.lat_orig, lon: r.lon_orig };
-    } else if (!stops[originId].lat && r.lat_orig) {
-      stops[originId].lat = r.lat_orig; stops[originId].lon = r.lon_orig;
+      stops[originId] = { name: orig.name, lat: orig.lat, lon: orig.lon };
+    } else if (!stops[originId].lat && orig.lat) {
+      stops[originId].lat = orig.lat; stops[originId].lon = orig.lon;
     }
     if (!stops[destId]) {
-      stops[destId] = { name: r.dest, lat: r.lat_dest, lon: r.lon_dest };
-    } else if (!stops[destId].lat && r.lat_dest) {
-      stops[destId].lat = r.lat_dest; stops[destId].lon = r.lon_dest;
+      stops[destId] = { name: dest.name, lat: dest.lat, lon: dest.lon };
+    } else if (!stops[destId].lat && dest.lat) {
+      stops[destId].lat = dest.lat; stops[destId].lon = dest.lon;
     }
 
     const depSec = timeToSeconds(r.dep);
@@ -221,6 +241,8 @@ function buildEngineData(records) {
   console.log(`    ❌ Non disponibles           : ${nonDispoTrips.toLocaleString()}`);
   console.log(`  Enregistrements incomplets     : ${skipped}`);
   console.log(`  Gares                          : ${Object.keys(stops).length.toLocaleString()}`);
+  console.log(`    📍 Résolues via CSV (FR+TVS) : ${matchedByCSV.toLocaleString()}`);
+  console.log(`    🔤 Fallback slug TGVMAX       : ${matchedBySlug.toLocaleString()}`);
   console.log(`  Jours couverts                 : ${Object.keys(calendarIdx).length}`);
 
   return { trips, stops, routesByStop: routesByStopSerial, calendarIndex: calendarIdx };
@@ -246,6 +268,10 @@ async function main() {
       exportUrl = op.api_url.replace('/records', '/exports/json') + '?limit=-1&timezone=Europe%2FParis';
     }
   }
+
+  console.log('── Chargement référentiel gares ──────────────────────');
+  matcher.load(CSV_FILE);
+  console.log('');
 
   console.log('── Téléchargement ────────────────────────────────────');
   const records = await downloadJson(exportUrl);

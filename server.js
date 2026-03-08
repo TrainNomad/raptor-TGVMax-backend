@@ -126,17 +126,19 @@ function searchStops(query, limit=10) {
   const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const results = [];
   for (const e of stopsIndex) {
-    const nom = e.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    if (nom.includes(q)) {
-      results.push({ type:'station', ...e });
-      if (results.length >= limit) break;
+    const nom  = e.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const city = (e.city||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (nom.includes(q) || city.includes(q)) {
+      // Priorité : commence par q > contient q
+      results.push({ type:'station', _score: nom.startsWith(q) ? 0 : 1, ...e });
+      if (results.length >= limit * 3) break;
     }
   }
   results.sort((a, b) => {
-    const ca = (a.city||a.name).toLowerCase(), cb = (b.city||b.name).toLowerCase();
-    return ca !== cb ? ca.localeCompare(cb,'fr') : (a.name||'').localeCompare(b.name||'','fr');
+    if (a._score !== b._score) return a._score - b._score;
+    return (a.name||'').localeCompare(b.name||'','fr');
   });
-  return results;
+  return results.slice(0, limit).map(({ _score, ...e }) => e);
 }
 
 function searchCities(query) {
