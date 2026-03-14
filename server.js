@@ -277,181 +277,325 @@ function searchJourneys(fromIds, toIds, dateISO, startTimeSec, limit=8) {
 // ─── Explore : toutes destinations depuis une gare ────────────────────────────
 
 function exploreDestinations(fromIds, dateISO) {
-  const fromSet = new Set(fromIds);
-  const dayTrips = getTripsForDate(dateISO);
+  const fromSet   = new Set(fromIds);
+  const dayTrips  = getTripsForDate(dateISO);
   const bestByDest = {};
+
+  const tripsByOrigin = buildTripsByOrigin(dayTrips);
+
+  // ── BFS jusqu'à MAX_LEGS legs ────────────────────────────────────────────────
+  // État : { currentStop, currentArr, legs[], visitedStops }
+  let frontier = [];
 
   for (const trip of dayTrips) {
     if (!fromSet.has(trip.origin_id)) continue;
-    if (!trip.dispo) continue;
+    if (!trip.dispo)                  continue;
+    if (trip.dep_time == null || trip.arr_time == null) continue;
 
     const did = trip.dest_id;
-    const dur = trip.dep_time != null && trip.arr_time != null
-      ? trip.arr_time - trip.dep_time : Infinity;
+    const dur = Math.round((trip.arr_time - trip.dep_time) / 60);
+    const leg = makeLegObj(trip, trip.origin_id, did);
 
+    // Enregistrer cette destination directe
     if (!bestByDest[did] || dur < bestByDest[did].duration) {
       bestByDest[did] = {
-        trip_id:   trip.trip_id,
-        dest_id:   did,
-        dest_name: resolveStopName(did),
-        dep_str:   trip.dep_str || secondsToHHMM(trip.dep_time),
-        arr_str:   trip.arr_str || secondsToHHMM(trip.arr_time),
-        dep_time:  trip.dep_time,
-        arr_time:  trip.arr_time,
-        duration:  dur !== Infinity ? Math.round(dur / 60) : null,
-        dest_lat:  resolveStopCoords(did).lat,
-        dest_lon:  resolveStopCoords(did).lon,
-        train_types:['TGVMAX'],
-        transfers: 0,
-        legs: [{
-          from_id:   trip.origin_id,
-          to_id:     did,
-          from_name: resolveStopName(trip.origin_id),
-          to_name:   resolveStopName(did),
-          dep_str:   trip.dep_str || secondsToHHMM(trip.dep_time),
-          arr_str:   trip.arr_str || secondsToHHMM(trip.arr_time),
-          dep_time:  trip.dep_time,
-          arr_time:  trip.arr_time,
-          operator:  'TGVMAX',
-          train_type:'TGVMAX',
-          train_no:  trip.train_no,
-        }],
+        dest_id:    did,
+        dest_name:  resolveStopName(did),
+        dep_str:    leg.dep_str,
+        arr_str:    leg.arr_str,
+        dep_time:   trip.dep_time,
+        arr_time:   trip.arr_time,
+        duration:   dur,
+        dest_lat:   resolveStopCoords(did).lat,
+        dest_lon:   resolveStopCoords(did).lon,
+        transfers:  0,
+        journeys:   [{ dep_str: leg.dep_str, arr_str: leg.arr_str, duration: dur, transfers: 0, legs: [leg] }],
       };
     }
+
+    frontier.push({
+      currentStop:  did,
+      currentArr:   trip.arr_time,
+      legs:         [leg],
+      visitedStops: new Set([trip.origin_id, did]),
+    });
   }
 
-  return Object.values(bestByDest);
+  // Exploration des correspondances (depth 2..MAX_LEGS)
+  for (let depth = 2; depth <= MAX_LEGS && frontier.length > 0; depth++) {
+    if (frontier.length > MAX_STATES_PER_ROUND) {
+      frontier.sort((a, b) => a.currentArr - b.currentArr);
+      frontier = frontier.slice(0, MAX_STATES_PER_ROUND);
+    }
+
+    const nextFrontier = [];
+
+    for (const state of frontier) {
+      const { currentStop, currentArr, legs, visitedStops } = state;
+      const candidates = tripsByOrigin[currentStop] || [];
+
+      for (const trip of candidates) {
+        if (!trip.dispo) continue;
+        if (trip.dep_time == null || trip.arr_time == null) continue;
+
+        const transferSec = trip.dep_time - currentArr;
+        if (transferSec < MIN_TRANSFER_SEC_DEFAULT) continue;
+        if (transferSec > MAX_TRANSFER_SEC_DEFAULT) continue;
+        if (visitedStops.has(trip.dest_id))         continue;
+
+        const did = trip.dest_id;
+        const leg = makeLegObj(trip, currentStop, did);
+        const newLegs = [...legs, leg];
+        const firstLeg = newLegs[0];
+        const totalDur = firstLeg.dep_time != null
+          ? Math.round((trip.arr_time - firstLeg.dep_time) / 60) : null;
+
+        // Enregistrer si meilleure arrivée
+        if (!bestByDest[did] || (totalDur !== null && totalDur < bestByDest[did].duration)) {
+          bestByDest[did] = {
+            dest_id:   did,
+            dest_name: resolveStopName(did),
+            dep_str:   firstLeg.dep_str,
+            arr_str:   leg.arr_str,
+            dep_time:  firstLeg.dep_time,
+            arr_time:  trip.arr_time,
+            duration:  totalDur,
+            dest_lat:  resolveStopCoords(did).lat,
+            dest_lon:  resolveStopCoords(did).lon,
+            transfers: newLegs.length - 1,
+            journeys:  [{ dep_str: firstLeg.dep_str, arr_str: leg.arr_str, duration: totalDur, transfers: newLegs.length - 1, legs: newLegs }],
+          };
+        }
+
+        if (depth < MAX_LEGS) {
+          const newVisited = new Set(visitedStops);
+          newVisited.add(did);
+          nextFrontier.push({
+            currentStop:  did,
+            currentArr:   trip.arr_time,
+            legs:         newLegs,
+            visitedStops: newVisited,
+          });
+        }
+      }
+    }
+
+    frontier = nextFrontier;
+  }
+
+  // Format de sortie compatible avec explorermax.js (attend dest_name, dest_lat, dest_lon, journeys[])
+  return Object.values(bestByDest).filter(d => d.dest_lat && d.dest_lon);
 }
 
-// ─── Recherche avec correspondances ──────────────────────────────────────────
+// ─── Recherche avec correspondances (jusqu'à 5 correspondances = 6 legs) ────────
 //
-// Algorithme :
-//   1. Trouver tous les trains qui partent des fromIds ce jour-là (leg 1)
-//   2. Pour chaque destination intermédiaire, trouver les trains qui repartent
-//      vers toIds avec un temps de correspondance suffisant (minTransferSec)
-//   3. Retourner les meilleures combinaisons triées par heure d'arrivée
+// Algorithme BFS itératif en couches :
+//   - Couche 0 : tous les trips partant des fromIds après startTimeSec et dispo
+//   - Couche k : pour chaque état (stop_id, arr_time, legs[]), on cherche les trips
+//                qui partent de stop_id avec un temps de correspondance valide
+//   - On s'arrête quand dest_id ∈ toSet (on a trouvé) ou quand on atteint MAX_LEGS
+//   - Élagage : on ne visite pas deux fois le même stop dans le même chemin (cycles),
+//               on ne continue pas si arr_time > meilleure arrivée connue à destination
+//               + coupe-circuit global pour rester performant
 
-const MIN_TRANSFER_SEC_DEFAULT = 20 * 60; // 20 minutes minimum par défaut
-const MAX_TRANSFER_SEC_DEFAULT = 4 * 3600; // 4 heures max entre les deux trains
+const MIN_TRANSFER_SEC_DEFAULT = 20 * 60; // 20 min minimum
+const MAX_TRANSFER_SEC_DEFAULT = 4 * 3600; // 4h max entre deux trains
+const MAX_LEGS = 6;          // 6 trains = 5 correspondances
+const MAX_STATES_PER_ROUND = 500;  // élagage pour éviter l'explosion combinatoire
+const MAX_TOTAL_RESULTS = 200;     // coupe-circuit global
+
+function buildTripsByOrigin(dayTrips) {
+  const idx = {};
+  for (const trip of dayTrips) {
+    if (!idx[trip.origin_id]) idx[trip.origin_id] = [];
+    idx[trip.origin_id].push(trip);
+  }
+  return idx;
+}
+
+function makeLegObj(trip, fromId, toId) {
+  return {
+    from_id:    fromId,
+    to_id:      toId,
+    from_name:  resolveStopName(fromId),
+    to_name:    resolveStopName(toId),
+    dep_time:   trip.dep_time,
+    arr_time:   trip.arr_time,
+    dep_str:    trip.dep_str  || secondsToHHMM(trip.dep_time),
+    arr_str:    trip.arr_str  || secondsToHHMM(trip.arr_time),
+    trip_id:    trip.trip_id,
+    train_no:   trip.train_no,
+    operator:   'TGVMAX',
+    train_type: 'INOUI',
+    duration:   trip.dep_time != null && trip.arr_time != null
+                ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
+  };
+}
+
+function buildJourneyFromLegs(legs, dateISO) {
+  const first = legs[0];
+  const last  = legs[legs.length - 1];
+  const allDispo = legs.every(l => {
+    const t = trips[l.trip_id];
+    return t ? t.dispo : true;
+  });
+  const totalDuration = first.dep_time != null && last.arr_time != null
+    ? Math.round((last.arr_time - first.dep_time) / 60) : null;
+
+  return {
+    trip_id:      legs.map(l => l.trip_id).join('|'),
+    date:         dateISO,
+    dep_time:     first.dep_time,
+    arr_time:     last.arr_time,
+    dep_str:      first.dep_str || secondsToHHMM(first.dep_time),
+    arr_str:      last.arr_str  || secondsToHHMM(last.arr_time),
+    duration:     totalDuration,
+    transfers:    legs.length - 1,
+    train_types:  legs.map(() => 'INOUI'),
+    operator:     'TGVMAX',
+    od_happy_card: allDispo ? 'oui' : 'non',
+    from_id:      first.from_id,
+    to_id:        last.to_id,
+    from_name:    first.from_name,
+    to_name:      last.to_name,
+    legs,
+  };
+}
 
 function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, options = {}) {
   const {
     minTransferSec = MIN_TRANSFER_SEC_DEFAULT,
     maxTransferSec = MAX_TRANSFER_SEC_DEFAULT,
-    maxResults = 10,
-    viaIds = null, // forcer une gare de correspondance spécifique
+    maxResults     = 10,
+    viaIds         = null,
+    maxLegs        = MAX_LEGS,
   } = options;
 
   const fromSet = new Set(fromIds);
   const toSet   = new Set(toIds);
   const viaSet  = viaIds ? new Set(viaIds) : null;
 
-  const dayTrips = getTripsForDate(dateISO);
-
-  // Index des départs par stop_id pour accélérer la recherche du leg 2
-  const tripsByOrigin = {};
-  for (const trip of dayTrips) {
-    if (!tripsByOrigin[trip.origin_id]) tripsByOrigin[trip.origin_id] = [];
-    tripsByOrigin[trip.origin_id].push(trip);
-  }
+  const dayTrips      = getTripsForDate(dateISO);
+  const tripsByOrigin = buildTripsByOrigin(dayTrips);
 
   const results = [];
-  const seen    = new Set(); // éviter les doublons
+  const seenKeys = new Set();
 
-  for (const leg1 of dayTrips) {
-    if (!fromSet.has(leg1.origin_id)) continue;
-    if (!leg1.dispo) continue;
-    if (leg1.dep_time != null && leg1.dep_time < startTimeSec) continue;
-    // Ignorer les trips qui arrivent déjà à destination (trajet direct)
-    if (toSet.has(leg1.dest_id)) continue;
-    // Filtrer par via si spécifié
-    if (viaSet && !viaSet.has(leg1.dest_id)) continue;
+  // bestArrToSet : meilleure arrivée connue à la destination — élagage
+  let bestArrToSet = Infinity;
 
-    const viaId = leg1.dest_id;
-    const leg1Arr = leg1.arr_time;
-    if (leg1Arr == null) continue;
+  // État BFS : { currentStop, currentArr, legs[], visitedStops Set }
+  // On initialise avec les trips du leg 1
+  let frontier = [];
 
-    // Chercher les trains leg 2 depuis la gare intermédiaire
-    const leg2Candidates = tripsByOrigin[viaId] || [];
-    for (const leg2 of leg2Candidates) {
-      if (!toSet.has(leg2.dest_id)) continue;
-      if (leg2.dep_time == null) continue;
+  for (const trip of dayTrips) {
+    if (!fromSet.has(trip.origin_id)) continue;
+    if (!trip.dispo)                  continue;
+    if (trip.dep_time != null && trip.dep_time < startTimeSec) continue;
 
-      const transferSec = leg2.dep_time - leg1Arr;
-      if (transferSec < minTransferSec) continue;
-      if (transferSec > maxTransferSec) continue;
+    const leg = makeLegObj(trip, trip.origin_id, trip.dest_id);
 
-      const key = leg1.trip_id + '|' + leg2.trip_id;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      const totalDuration = leg2.arr_time != null
-        ? Math.round((leg2.arr_time - leg1.dep_time) / 60) : null;
-
-      // La correspondance est dispo seulement si les deux legs le sont
-      const bothDispo = leg1.dispo && leg2.dispo;
-
-      results.push({
-        trip_id:           key,
-        date:              dateISO,
-        dep_time:          leg1.dep_time,
-        arr_time:          leg2.arr_time,
-        dep_str:           leg1.dep_str || secondsToHHMM(leg1.dep_time),
-        arr_str:           leg2.arr_str || secondsToHHMM(leg2.arr_time),
-        duration:          totalDuration,
-        transfers:         1,
-        transfer_duration: Math.round(transferSec / 60),
-        train_types:       ['INOUI', 'INOUI'],
-        operator:          'TGVMAX',
-        od_happy_card:     bothDispo ? 'oui' : 'non',
-        from_id:           leg1.origin_id,
-        to_id:             leg2.dest_id,
-        from_name:         resolveStopName(leg1.origin_id),
-        to_name:           resolveStopName(leg2.dest_id),
-        via_id:            viaId,
-        via_name:          resolveStopName(viaId),
-        legs: [
-          {
-            from_id:    leg1.origin_id,
-            to_id:      viaId,
-            from_name:  resolveStopName(leg1.origin_id),
-            to_name:    resolveStopName(viaId),
-            dep_time:   leg1.dep_time,
-            arr_time:   leg1.arr_time,
-            dep_str:    leg1.dep_str || secondsToHHMM(leg1.dep_time),
-            arr_str:    leg1.arr_str || secondsToHHMM(leg1.arr_time),
-            trip_id:    leg1.trip_id,
-            train_no:   leg1.train_no,
-            operator:   'TGVMAX',
-            train_type: 'INOUI',
-            duration:   leg1.dep_time != null && leg1.arr_time != null
-                        ? Math.round((leg1.arr_time - leg1.dep_time) / 60) : null,
-          },
-          {
-            from_id:    viaId,
-            to_id:      leg2.dest_id,
-            from_name:  resolveStopName(viaId),
-            to_name:    resolveStopName(leg2.dest_id),
-            dep_time:   leg2.dep_time,
-            arr_time:   leg2.arr_time,
-            dep_str:    leg2.dep_str || secondsToHHMM(leg2.dep_time),
-            arr_str:    leg2.arr_str || secondsToHHMM(leg2.arr_time),
-            trip_id:    leg2.trip_id,
-            train_no:   leg2.train_no,
-            operator:   'TGVMAX',
-            train_type: 'INOUI',
-            duration:   leg2.dep_time != null && leg2.arr_time != null
-                        ? Math.round((leg2.arr_time - leg2.dep_time) / 60) : null,
-          },
-        ],
-      });
-
-      if (results.length >= maxResults * 10) break; // coupe-circuit
+    // Trajet direct
+    if (toSet.has(trip.dest_id)) {
+      const key = trip.trip_id;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        const j = buildJourneyFromLegs([leg], dateISO);
+        results.push(j);
+        if ((trip.arr_time || Infinity) < bestArrToSet) bestArrToSet = trip.arr_time;
+      }
+      continue;
     }
+
+    // Filtrer par via si spécifié (la gare intermédiaire doit être dans le chemin)
+    if (viaSet && !viaSet.has(trip.dest_id)) continue;
+
+    if (trip.arr_time == null) continue;
+
+    frontier.push({
+      currentStop:   trip.dest_id,
+      currentArr:    trip.arr_time,
+      legs:          [leg],
+      visitedStops:  new Set([trip.origin_id, trip.dest_id]),
+    });
   }
 
-  results.sort((a, b) => (a.arr_time || 0) - (b.arr_time || 0));
-  return results.slice(0, maxResults);
+  // BFS couche par couche jusqu'à maxLegs
+  for (let depth = 2; depth <= maxLegs && frontier.length > 0; depth++) {
+    // Élaguer les états dont l'arrivée dépasse déjà le meilleur résultat
+    frontier = frontier.filter(s => s.currentArr < bestArrToSet);
+
+    // Limiter le frontier pour la performance
+    if (frontier.length > MAX_STATES_PER_ROUND) {
+      frontier.sort((a, b) => a.currentArr - b.currentArr);
+      frontier = frontier.slice(0, MAX_STATES_PER_ROUND);
+    }
+
+    const nextFrontier = [];
+
+    for (const state of frontier) {
+      const { currentStop, currentArr, legs, visitedStops } = state;
+      const candidates = tripsByOrigin[currentStop] || [];
+
+      for (const trip of candidates) {
+        if (trip.dep_time == null || trip.arr_time == null) continue;
+
+        const transferSec = trip.dep_time - currentArr;
+        if (transferSec < minTransferSec) continue;
+        if (transferSec > maxTransferSec) continue;
+
+        // Éviter les cycles
+        if (visitedStops.has(trip.dest_id)) continue;
+
+        // Élagage : inutile de continuer si on arrive après le meilleur résultat
+        if (trip.arr_time >= bestArrToSet) continue;
+
+        const leg = makeLegObj(trip, currentStop, trip.dest_id);
+        const newLegs = [...legs, leg];
+
+        // Destination atteinte
+        if (toSet.has(trip.dest_id)) {
+          const key = newLegs.map(l => l.trip_id).join('|');
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            const j = buildJourneyFromLegs(newLegs, dateISO);
+            results.push(j);
+            if (trip.arr_time < bestArrToSet) bestArrToSet = trip.arr_time;
+          }
+          if (results.length >= MAX_TOTAL_RESULTS) break;
+          continue;
+        }
+
+        // Continuer l'exploration si on n'a pas atteint la profondeur max
+        if (depth < maxLegs) {
+          const newVisited = new Set(visitedStops);
+          newVisited.add(trip.dest_id);
+          nextFrontier.push({
+            currentStop:  trip.dest_id,
+            currentArr:   trip.arr_time,
+            legs:         newLegs,
+            visitedStops: newVisited,
+          });
+        }
+      }
+
+      if (results.length >= MAX_TOTAL_RESULTS) break;
+    }
+
+    frontier = nextFrontier;
+    if (results.length >= MAX_TOTAL_RESULTS) break;
+  }
+
+  // Supprimer les doublons (même clé de trip_ids)
+  const unique = [];
+  const finalSeen = new Set();
+  for (const j of results) {
+    if (!finalSeen.has(j.trip_id)) { finalSeen.add(j.trip_id); unique.push(j); }
+  }
+
+  // Trier : d'abord par heure d'arrivée, puis par nombre de correspondances
+  unique.sort((a, b) => (a.arr_time || 0) - (b.arr_time || 0) || a.transfers - b.transfers);
+  return unique.slice(0, maxResults);
 }
 
 // ─── HTTP ─────────────────────────────────────────────────────────────────────
@@ -550,11 +694,13 @@ const server = http.createServer(async (req, res) => {
     // Trajets directs
     const directJourneys = searchJourneys(fromIds, toIds, dateStr, startSec, limit);
 
-    // Trajets avec correspondance (seulement si date fournie)
+    // Trajets avec correspondance jusqu'à 5 (seulement si date fournie)
     let transferJourneys = [];
     if (dateStr) {
+      const maxLegsParam = Math.min(parseInt(q.max_legs || '6'), 6); // 6 trains = 5 corresp max
       transferJourneys = searchJourneysWithTransfer(fromIds, toIds, dateStr, startSec, {
         maxResults: limit,
+        maxLegs:    maxLegsParam,
       });
     }
 
