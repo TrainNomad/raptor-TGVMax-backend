@@ -303,16 +303,9 @@ function exploreDestinations(fromIds, dateISO) {
     if (!fromSet.has(trip.origin_id))          continue;
     if (trip.dep_time == null || trip.arr_time == null) continue;
 
-    // Normaliser arr_time : si le train arrive après minuit, arr_time < dep_time
-    // On ajoute 86400s pour avoir une valeur chronologique cohérente
-    const arrTimeNorm = trip.arr_time < trip.dep_time
-      ? trip.arr_time + 86400
-      : trip.arr_time;
-
     const did = trip.dest_id;
-    const dur = Math.round((arrTimeNorm - trip.dep_time) / 60);
-    const leg = { ...makeLegObj(trip, trip.origin_id, did), arr_time: arrTimeNorm,
-                  arr_str: secondsToHHMM(arrTimeNorm) };
+    const leg = makeLegObj(trip, trip.origin_id, did);  // arr_time normalisé dans makeLegObj
+    const dur = leg.duration;
 
     // Garder la destination directe si c'est la plus courte
     if (!bestByDest[did] || dur < bestByDest[did].duration) {
@@ -368,11 +361,6 @@ function exploreDestinations(fromIds, dateISO) {
       for (const trip of candidates) {
         if (trip.dep_time == null || trip.arr_time == null) continue;
 
-        // Normaliser arr_time de la correspondance
-        const corrArrNorm = trip.arr_time < trip.dep_time
-          ? trip.arr_time + 86400
-          : trip.arr_time;
-
         const wait = trip.dep_time - currentArr;
         if (wait < MIN_TRANSFER_SEC_DEFAULT) continue;  // trop court
         if (wait > MAX_TRANSFER_SEC_DEFAULT) continue;  // trop long
@@ -381,14 +369,11 @@ function exploreDestinations(fromIds, dateISO) {
         // Rejeter si le train de correspondance arrive le lendemain du départ initial
         // (dep_time du leg 1 est dans la journée, arrNorm > 86400 = hors journée)
         const firstDepTime = legs[0]?.dep_time || 0;
-        if (corrArrNorm - firstDepTime > 86400) continue;
-
-        const did      = trip.dest_id;
-        const leg      = { ...makeLegObj(trip, currentStop, did), arr_time: corrArrNorm,
-                           arr_str: secondsToHHMM(corrArrNorm) };
+        const did = trip.dest_id;
+        const leg = makeLegObj(trip, currentStop, did);
         const newLegs  = [...legs, leg];
         const firstLeg = newLegs[0];
-        const totalDur = Math.round((corrArrNorm - firstLeg.dep_time) / 60);
+        const totalDur = Math.round((leg.arr_time - firstLeg.dep_time) / 60);
 
         // Mettre à jour si c'est le trajet le plus court vers cette destination
         if (!bestByDest[did] || totalDur < bestByDest[did].duration) {
@@ -422,7 +407,7 @@ function exploreDestinations(fromIds, dateISO) {
           newVisited.add(did);
           nextFrontier.push({
             currentStop:  did,
-            currentArr:   trip.arr_time,
+            currentArr:   leg.arr_time,   // normalisé
             legs:         newLegs,
             visitedStops: newVisited,
           });
@@ -464,21 +449,30 @@ function buildTripsByOrigin(dayTrips) {
 }
 
 function makeLegObj(trip, fromId, toId) {
+  // Normaliser arr_time : si le train arrive après minuit (arr < dep),
+  // ajouter 86400s pour que la chronologie soit cohérente
+  const arrNorm = (trip.arr_time != null && trip.dep_time != null && trip.arr_time < trip.dep_time)
+    ? trip.arr_time + 86400
+    : trip.arr_time;
+
+  const dur = (trip.dep_time != null && arrNorm != null)
+    ? Math.round((arrNorm - trip.dep_time) / 60)
+    : null;
+
   return {
     from_id:    fromId,
     to_id:      toId,
     from_name:  resolveStopName(fromId),
     to_name:    resolveStopName(toId),
     dep_time:   trip.dep_time,
-    arr_time:   trip.arr_time,
-    dep_str:    trip.dep_str  || secondsToHHMM(trip.dep_time),
-    arr_str:    trip.arr_str  || secondsToHHMM(trip.arr_time),
+    arr_time:   arrNorm,
+    dep_str:    trip.dep_str || secondsToHHMM(trip.dep_time),
+    arr_str:    secondsToHHMM(arrNorm),   // recalculé avec la valeur normalisée
     trip_id:    trip.trip_id,
     train_no:   trip.train_no,
     operator:   'TGVMAX',
     train_type: 'INOUI',
-    duration:   trip.dep_time != null && trip.arr_time != null
-                ? Math.round((trip.arr_time - trip.dep_time) / 60) : null,
+    duration:   dur,
   };
 }
 
@@ -590,9 +584,6 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
       for (const trip of candidates) {
         if (trip.dep_time == null || trip.arr_time == null) continue;
 
-        // Normaliser arr_time
-        const normArr = trip.arr_time < trip.dep_time ? trip.arr_time + 86400 : trip.arr_time;
-
         const transferSec = trip.dep_time - currentArr;
         if (transferSec < minTransferSec) continue;
         if (transferSec > maxTransferSec) continue;
@@ -601,14 +592,8 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
         if (visitedStops.has(trip.dest_id)) continue;
 
         // Élagage : inutile de continuer si on arrive après le meilleur résultat
-        if (normArr >= bestArrToSet) continue;
-
-        // Rejeter si le trajet total dépasse la journée de départ
-        const firstDepTime2 = legs[0]?.dep_time || 0;
-        if (normArr - firstDepTime2 > 86400) continue;
-
-        const leg = { ...makeLegObj(trip, currentStop, trip.dest_id),
-                      arr_time: normArr, arr_str: secondsToHHMM(normArr) };
+        const leg = makeLegObj(trip, currentStop, trip.dest_id);
+        if (leg.arr_time >= bestArrToSet) continue;
         const newLegs = [...legs, leg];
 
         // Destination atteinte
@@ -618,7 +603,7 @@ function searchJourneysWithTransfer(fromIds, toIds, dateISO, startTimeSec, optio
             seenKeys.add(key);
             const j = buildJourneyFromLegs(newLegs, dateISO);
             results.push(j);
-            if (normArr < bestArrToSet) bestArrToSet = normArr;
+            if (leg.arr_time < bestArrToSet) bestArrToSet = leg.arr_time;
           }
           if (results.length >= MAX_TOTAL_RESULTS) break;
           continue;
