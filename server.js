@@ -215,10 +215,15 @@ function cityKeyOfStop(stopId) {
 //
 // Les trajets TGVmax sont TOUS directs (pas de correspondances).
 
-function getTripsForDate(dateISO) {
-  if (!dateISO) return Object.values(trips);
-  const ids = allCalendarIndex[dateISO] || [];
-  return ids.map(id => trips[id]).filter(Boolean);
+function getTripsForDate(dateISO, dispoOnly = false) {
+  let list;
+  if (!dateISO) {
+    list = Object.values(trips);
+  } else {
+    const ids = allCalendarIndex[dateISO] || [];
+    list = ids.map(id => trips[id]).filter(Boolean);
+  }
+  return dispoOnly ? list.filter(t => t.dispo) : list;
 }
 
 function searchJourneys(fromIds, toIds, dateISO, startTimeSec, limit=8) {
@@ -277,39 +282,51 @@ function searchJourneys(fromIds, toIds, dateISO, startTimeSec, limit=8) {
 // ─── Explore : toutes destinations depuis une gare ────────────────────────────
 
 function exploreDestinations(fromIds, dateISO) {
-  const fromSet   = new Set(fromIds);
-  const dayTrips  = getTripsForDate(dateISO);
+  const fromSet  = new Set(fromIds);
+  // dispoOnly=true : on ne prend QUE les trains avec places disponibles TGVmax
+  const dayTrips = getTripsForDate(dateISO, true);
   const bestByDest = {};
 
+  // Index des départs par gare — construit UNE fois sur les trips dispo
   const tripsByOrigin = buildTripsByOrigin(dayTrips);
 
-  // ── BFS jusqu'à MAX_LEGS legs ────────────────────────────────────────────────
-  // État : { currentStop, currentArr, legs[], visitedStops }
+  // ── BFS : leg 1 depuis les origines ──────────────────────────────────────────
   let frontier = [];
 
   for (const trip of dayTrips) {
-    if (!fromSet.has(trip.origin_id)) continue;
-    if (!trip.dispo)                  continue;
+    if (!fromSet.has(trip.origin_id))          continue;
     if (trip.dep_time == null || trip.arr_time == null) continue;
 
     const did = trip.dest_id;
     const dur = Math.round((trip.arr_time - trip.dep_time) / 60);
     const leg = makeLegObj(trip, trip.origin_id, did);
 
-    // Enregistrer cette destination directe
+    // Garder la destination directe si c'est la plus courte
     if (!bestByDest[did] || dur < bestByDest[did].duration) {
+      const coords = resolveStopCoords(did);
       bestByDest[did] = {
-        dest_id:    did,
-        dest_name:  resolveStopName(did),
-        dep_str:    leg.dep_str,
-        arr_str:    leg.arr_str,
-        dep_time:   trip.dep_time,
-        arr_time:   trip.arr_time,
-        duration:   dur,
-        dest_lat:   resolveStopCoords(did).lat,
-        dest_lon:   resolveStopCoords(did).lon,
-        transfers:  0,
-        journeys:   [{ dep_str: leg.dep_str, arr_str: leg.arr_str, duration: dur, transfers: 0, legs: [leg] }],
+        // Champs plats attendus par explorermax.js
+        dest_id:   did,
+        dest_name: resolveStopName(did),
+        dep_str:   leg.dep_str,
+        arr_str:   leg.arr_str,
+        dep_time:  trip.dep_time,
+        arr_time:  trip.arr_time,
+        duration:  dur,
+        transfers: 0,
+        dest_lat:  coords.lat,
+        dest_lon:  coords.lon,
+        // Tableau journeys pour la compatibilité avec buildDestinations()
+        journeys: [{
+          dep_str:   leg.dep_str,
+          arr_str:   leg.arr_str,
+          dep_time:  trip.dep_time,
+          arr_time:  trip.arr_time,
+          duration:  dur,
+          transfers: 0,
+          train_types: ['TGVMAX'],
+          legs:      [leg],
+        }],
       };
     }
 
@@ -321,8 +338,9 @@ function exploreDestinations(fromIds, dateISO) {
     });
   }
 
-  // Exploration des correspondances (depth 2..MAX_LEGS)
+  // ── BFS : correspondances (depth 2..MAX_LEGS) ─────────────────────────────────
   for (let depth = 2; depth <= MAX_LEGS && frontier.length > 0; depth++) {
+    // Élaguer pour limiter l'explosion combinatoire
     if (frontier.length > MAX_STATES_PER_ROUND) {
       frontier.sort((a, b) => a.currentArr - b.currentArr);
       frontier = frontier.slice(0, MAX_STATES_PER_ROUND);
@@ -335,23 +353,22 @@ function exploreDestinations(fromIds, dateISO) {
       const candidates = tripsByOrigin[currentStop] || [];
 
       for (const trip of candidates) {
-        if (!trip.dispo) continue;
         if (trip.dep_time == null || trip.arr_time == null) continue;
 
-        const transferSec = trip.dep_time - currentArr;
-        if (transferSec < MIN_TRANSFER_SEC_DEFAULT) continue;
-        if (transferSec > MAX_TRANSFER_SEC_DEFAULT) continue;
-        if (visitedStops.has(trip.dest_id))         continue;
+        const wait = trip.dep_time - currentArr;
+        if (wait < MIN_TRANSFER_SEC_DEFAULT) continue;  // trop court
+        if (wait > MAX_TRANSFER_SEC_DEFAULT) continue;  // trop long
+        if (visitedStops.has(trip.dest_id))  continue;  // cycle
 
-        const did = trip.dest_id;
-        const leg = makeLegObj(trip, currentStop, did);
-        const newLegs = [...legs, leg];
+        const did      = trip.dest_id;
+        const leg      = makeLegObj(trip, currentStop, did);
+        const newLegs  = [...legs, leg];
         const firstLeg = newLegs[0];
-        const totalDur = firstLeg.dep_time != null
-          ? Math.round((trip.arr_time - firstLeg.dep_time) / 60) : null;
+        const totalDur = Math.round((trip.arr_time - firstLeg.dep_time) / 60);
 
-        // Enregistrer si meilleure arrivée
-        if (!bestByDest[did] || (totalDur !== null && totalDur < bestByDest[did].duration)) {
+        // Mettre à jour si c'est le trajet le plus court vers cette destination
+        if (!bestByDest[did] || totalDur < bestByDest[did].duration) {
+          const coords = resolveStopCoords(did);
           bestByDest[did] = {
             dest_id:   did,
             dest_name: resolveStopName(did),
@@ -360,10 +377,19 @@ function exploreDestinations(fromIds, dateISO) {
             dep_time:  firstLeg.dep_time,
             arr_time:  trip.arr_time,
             duration:  totalDur,
-            dest_lat:  resolveStopCoords(did).lat,
-            dest_lon:  resolveStopCoords(did).lon,
             transfers: newLegs.length - 1,
-            journeys:  [{ dep_str: firstLeg.dep_str, arr_str: leg.arr_str, duration: totalDur, transfers: newLegs.length - 1, legs: newLegs }],
+            dest_lat:  coords.lat,
+            dest_lon:  coords.lon,
+            journeys: [{
+              dep_str:   firstLeg.dep_str,
+              arr_str:   leg.arr_str,
+              dep_time:  firstLeg.dep_time,
+              arr_time:  trip.arr_time,
+              duration:  totalDur,
+              transfers: newLegs.length - 1,
+              train_types: newLegs.map(() => 'TGVMAX'),
+              legs:      newLegs,
+            }],
           };
         }
 
@@ -383,7 +409,7 @@ function exploreDestinations(fromIds, dateISO) {
     frontier = nextFrontier;
   }
 
-  // Format de sortie compatible avec explorermax.js (attend dest_name, dest_lat, dest_lon, journeys[])
+  // Ne retourner que les destinations avec coordonnées GPS valides
   return Object.values(bestByDest).filter(d => d.dest_lat && d.dest_lon);
 }
 
@@ -773,9 +799,24 @@ const server = http.createServer(async (req, res) => {
 
     console.log('\n[EXPLORE TGVmax]', dateStr || 'sans date', '| from:', fromIds.join(','));
 
-    const journeys = exploreDestinations(fromIds, dateStr);
+    const destinations = exploreDestinations(fromIds, dateStr);
 
-    console.log(`  → ${journeys.length} destinations | ${Date.now()-t0}ms`);
+    // Convertir au format attendu par explorermax.js buildDestinations() :
+    // chaque item doit avoir dest_lat, dest_lon, et legs[{to_id, to_name}]
+    const journeys = destinations.map(d => ({
+      dep_time:  d.dep_time,
+      arr_time:  d.arr_time,
+      dep_str:   d.dep_str,
+      arr_str:   d.arr_str,
+      duration:  d.duration,
+      transfers: d.transfers,
+      dest_lat:  d.dest_lat,
+      dest_lon:  d.dest_lon,
+      train_types: ['TGVMAX'],
+      legs: [{ to_id: d.dest_id, to_name: d.dest_name }],
+    }));
+
+    console.log(`  → ${journeys.length} destinations (${destinations.filter(d=>d.transfers>0).length} avec corresp.) | ${Date.now()-t0}ms`);
     return jsonResp(res, { journeys, computed_ms: Date.now()-t0 });
   }
 
