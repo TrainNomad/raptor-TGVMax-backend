@@ -819,19 +819,35 @@ const server = http.createServer(async (req, res) => {
     const destinations = exploreDestinations(fromIds, dateStr);
 
     // Convertir au format attendu par explorermax.js buildDestinations() :
-    // chaque item doit avoir dest_lat, dest_lon, et legs[{to_id, to_name}]
-    const journeys = destinations.map(d => ({
-      dep_time:  d.dep_time,
-      arr_time:  d.arr_time,
-      dep_str:   d.dep_str,
-      arr_str:   d.arr_str,
-      duration:  d.duration,
-      transfers: d.transfers,
-      dest_lat:  d.dest_lat,
-      dest_lon:  d.dest_lon,
-      train_types: ['TGVMAX'],
-      legs: [{ to_id: d.dest_id, to_name: d.dest_name }],
-    }));
+    // inclure dep_str/arr_str à la racine ET dans les legs pour le popup
+    const journeys = destinations.map(d => {
+      const bestJ = d.journeys?.[0];
+      const legs  = bestJ?.legs || [{
+        from_id:   d.from_id || '',
+        to_id:     d.dest_id,
+        from_name: d.from_name || '',
+        to_name:   d.dest_name,
+        dep_time:  d.dep_time,
+        arr_time:  d.arr_time,
+        dep_str:   d.dep_str,
+        arr_str:   d.arr_str,
+        operator:  'TGVMAX',
+        train_type:'INOUI',
+        duration:  d.duration,
+      }];
+      return {
+        dep_time:    d.dep_time,
+        arr_time:    d.arr_time,
+        dep_str:     d.dep_str,
+        arr_str:     d.arr_str,
+        duration:    d.duration,
+        transfers:   d.transfers,
+        dest_lat:    d.dest_lat,
+        dest_lon:    d.dest_lon,
+        train_types: ['TGVMAX'],
+        legs,
+      };
+    });
 
     console.log(`  → ${journeys.length} destinations (${destinations.filter(d=>d.transfers>0).length} avec corresp.) | ${Date.now()-t0}ms`);
     return jsonResp(res, { journeys, computed_ms: Date.now()-t0 });
