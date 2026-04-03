@@ -19,7 +19,7 @@
  *   node build-tgvmax.js --raw                  — sauvegarde aussi tgvmax_raw.json
  *
  * Dépendances : aucune (Node.js natif uniquement)
- * Source API   : https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/tgvmax/records
+ * Source API   : https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/tgvmax/exports/json
  * Source CSV   : https://github.com/trainline-eu/stations  (stations.csv)
  */
 
@@ -47,64 +47,77 @@ const UIC_FILE     = path.join(OUT_DIR, 'uic_to_iata.json');
 const STATIONS_OUT = path.join(OUT_DIR, 'stations.json');
 const RAW_FILE     = path.join(OUT_DIR, 'tgvmax_raw.json');
 
-const API_BASE    = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/tgvmax/records';
-const PAGE_SIZE   = 100;
-const CONCURRENCY = 8;
+// ─── Export URL (un seul appel, pas de pagination) ────────────────────────────
+// L'API paginée /records échoue en HTTP 400 passé ~10 000 records.
+// L'endpoint /exports/json retourne tout le dataset filtré en un seul flux JSON.
+const EXPORT_BASE = 'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/tgvmax/exports/json';
 
-// ─── HTTP avec retry ──────────────────────────────────────────────────────────
-function fetchJSON(url, attempt = 1) {
+function buildExportUrl(where) {
+  const p = new URLSearchParams({
+    limit:    '-1',
+    timezone: 'Europe/Paris',
+  });
+  if (where) p.set('where', where);
+  return `${EXPORT_BASE}?${p.toString()}`;
+}
+
+// ─── HTTP streaming avec retry ────────────────────────────────────────────────
+// Le dataset peut faire plusieurs dizaines de MB — on streame pour éviter
+// d'exploser la mémoire avant de parser.
+function fetchExport(url, attempt = 1) {
   return new Promise((resolve, reject) => {
     const req = https.get(url, { headers: { Accept: 'application/json' } }, res => {
       if (res.statusCode === 429 || res.statusCode >= 500) {
         res.resume();
-        if (attempt < 5) return setTimeout(() => fetchJSON(url, attempt + 1).then(resolve).catch(reject), attempt * 3000);
+        if (attempt < 5) {
+          const delay = attempt * 5000;
+          console.log(`  ⚠️  HTTP ${res.statusCode} — retry dans ${delay / 1000}s (tentative ${attempt}/5)`);
+          return setTimeout(() => fetchExport(url, attempt + 1).then(resolve).catch(reject), delay);
+        }
         return reject(new Error(`HTTP ${res.statusCode} après ${attempt} tentatives`));
       }
-      if (res.statusCode !== 200) { res.resume(); return reject(new Error(`HTTP ${res.statusCode}`)); }
-      let raw = '';
-      res.on('data', c => raw += c);
-      res.on('end', () => { try { resolve(JSON.parse(raw)); } catch { reject(new Error('JSON invalide')); } });
+      if (res.statusCode !== 200) {
+        res.resume();
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+
+      // Streaming + progression
+      const chunks = [];
+      let received = 0;
+      const t0 = Date.now();
+
+      res.on('data', chunk => {
+        chunks.push(chunk);
+        received += chunk.length;
+        const mb      = (received / 1024 / 1024).toFixed(1);
+        const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+        process.stdout.write(`\r  Reçu : ${mb} MB  (${elapsed}s)   `);
+      });
+
+      res.on('end', () => {
+        process.stdout.write('\n');
+        const raw = Buffer.concat(chunks).toString('utf8');
+        try {
+          resolve(JSON.parse(raw));
+        } catch {
+          reject(new Error('JSON invalide — réponse tronquée ? (' + raw.slice(0, 200) + ')'));
+        }
+      });
+
+      res.on('error', reject);
     });
-    req.on('error', err => attempt < 5
-      ? setTimeout(() => fetchJSON(url, attempt + 1).then(resolve).catch(reject), attempt * 2000)
-      : reject(err));
-    req.setTimeout(30000, () => req.destroy(new Error('timeout')));
+
+    req.on('error', err => {
+      if (attempt < 5) {
+        console.log(`  ⚠️  Erreur réseau — retry (tentative ${attempt}/5)`);
+        return setTimeout(() => fetchExport(url, attempt + 1).then(resolve).catch(reject), attempt * 2000);
+      }
+      reject(err);
+    });
+
+    // Timeout généreux : le dataset complet peut prendre plusieurs minutes
+    req.setTimeout(300000, () => req.destroy(new Error('timeout (5 min)')));
   });
-}
-
-function buildUrl(offset, where) {
-  const p = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(offset) });
-  if (where) p.set('where', where);
-  return `${API_BASE}?${p.toString()}`;
-}
-
-// ─── Téléchargement paginé ────────────────────────────────────────────────────
-async function fetchAllRecords(where) {
-  const probe = await fetchJSON(buildUrl(0, where));
-  const total = probe.total_count || 0;
-  if (total === 0) return [];
-
-  const offsets = [];
-  for (let i = 0; i < total; i += PAGE_SIZE) offsets.push(i);
-  console.log(`  API → ${total.toLocaleString()} records  (${offsets.length} pages × ${PAGE_SIZE})`);
-
-  const records = [...(probe.results || [])];
-  let done = records.length;
-  const t0 = Date.now();
-
-  for (let b = 1; b < offsets.length; b += CONCURRENCY) {
-    const chunk = offsets.slice(b, b + CONCURRENCY);
-    const pages = await Promise.all(chunk.map(off => fetchJSON(buildUrl(off, where))));
-    for (const page of pages) { records.push(...(page.results || [])); done += (page.results?.length || 0); }
-
-    const elapsed = (Date.now() - t0) / 1000 || 0.01;
-    const pct  = Math.min(Math.round(done / total * 100), 100);
-    const bar  = '█'.repeat(Math.round(pct / 5)).padEnd(20, '░');
-    const eta  = ((total - done) / (done / elapsed || 1)).toFixed(0);
-    process.stdout.write(`\r  [${bar}] ${pct}%  ${done.toLocaleString()}/${total.toLocaleString()}  ETA ${eta}s   `);
-  }
-  process.stdout.write('\n');
-  return records;
 }
 
 // ─── Construction de l'index TGVmax ──────────────────────────────────────────
@@ -117,8 +130,7 @@ function buildTgvmaxIndex(records) {
     const { date, train_no, origine_iata, destination_iata, origine, destination, od_happy_card } = r;
     if (!date || !train_no || !origine_iata || !destination_iata) continue;
 
-    // Mémoriser les noms IATA
-    if (origine_iata && origine)     iataNames[origine_iata]     = origine;
+    if (origine_iata && origine)         iataNames[origine_iata]     = origine;
     if (destination_iata && destination) iataNames[destination_iata] = destination;
 
     if (od_happy_card !== 'OUI') { nNon++; continue; }
@@ -162,7 +174,7 @@ function parseCsv(filePath) {
 function normName(s) {
   return (s || '')
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // enlever accents
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\(intramuros\)/gi, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
@@ -172,27 +184,20 @@ function nameVariants(raw) {
   const base = normName(raw);
   const set  = new Set([base]);
 
-  // Enlever suffixes courants
   const stripped = base
     .replace(/\b(ville|st jean|saint jean|st charles|saint charles|st pierre|saint pierre|matabiau|part dieu|st lazare|saint lazare|gare du nord|gare de lyon|gare de lest|montparnasse|rive droite|rive gauche|central|centrale|centre)\b/g, '')
     .replace(/\s+/g, ' ').trim();
   if (stripped && stripped !== base) set.add(stripped);
 
-  // Premier mot seul
   const words = base.split(' ');
   if (words[0] && words[0].length > 3 && words.length > 1) set.add(words[0]);
-  // Deux premiers mots
   if (words.length > 2) set.add(words.slice(0, 2).join(' '));
 
   return [...set].filter(Boolean);
 }
 
 // ─── Construire mapping UIC8 ↔ IATA depuis le CSV ───────────────────────────
-// Le CSV Trainline n'a pas de colonne IATA directe, mais on peut faire :
-//   iata_airport_code quand c'est une gare d'aéroport (rare, pas utile ici)
-//   → on croise par nom : iataNames (nom TGVmax) ↔ colonne "name" du CSV
 function buildUicToIata(iataNames, csvRows) {
-  // Index CSV : normName(name) → uic8_sncf
   const nameToUic = new Map();
   for (const row of csvRows) {
     const uic8 = row['uic8_sncf']?.trim();
@@ -203,7 +208,7 @@ function buildUicToIata(iataNames, csvRows) {
       if (!nameToUic.has(variant)) nameToUic.set(variant, uic8);
     }
   }
-  // Aussi indexer par sncf_id (ex: "FRPAR" → uic8)
+
   const sncfIdToUic = new Map();
   for (const row of csvRows) {
     const uic8   = row['uic8_sncf']?.trim();
@@ -216,13 +221,11 @@ function buildUicToIata(iataNames, csvRows) {
   const missedList = [];
 
   for (const [iata, nom] of Object.entries(iataNames)) {
-    // 1. Essai direct par nom
     let foundUic = null;
     for (const variant of nameVariants(nom)) {
       const u = nameToUic.get(variant);
       if (u) { foundUic = u; break; }
     }
-    // 2. Essai par sncf_id = iata (ex: FRPAR, FRMRS)
     if (!foundUic) {
       const u = sncfIdToUic.get(iata);
       if (u) foundUic = u;
@@ -241,15 +244,10 @@ function buildUicToIata(iataNames, csvRows) {
 
 // ─── Construire stations.json filtré TGVmax ───────────────────────────────────
 function buildStations(iataNames, uicToIata, csvRows) {
-  // Ensemble des UIC8 desservies par TGVmax
-  const tgvmaxUics = new Set(Object.keys(uicToIata));
-
-  // Index CSV par uic8_sncf
   const csvByUic = new Map();
   for (const row of csvRows) {
     const uic8 = row['uic8_sncf']?.trim();
     if (!uic8) continue;
-    // Garder la ligne principale (is_main_station = t) en priorité
     if (!csvByUic.has(uic8) || row['is_main_station'] === 't') {
       csvByUic.set(uic8, row);
     }
@@ -258,15 +256,13 @@ function buildStations(iataNames, uicToIata, csvRows) {
   const stations = [];
 
   for (const [uic8, iata] of Object.entries(uicToIata)) {
-    const row  = csvByUic.get(uic8);
-    const nom  = row ? row['name']?.trim() : (iataNames[iata] || iata);
-    const lat  = row ? parseFloat(row['latitude'])  || 0 : 0;
-    const lon  = row ? parseFloat(row['longitude']) || 0 : 0;
+    const row     = csvByUic.get(uic8);
+    const nom     = row ? row['name']?.trim() : (iataNames[iata] || iata);
+    const lat     = row ? parseFloat(row['latitude'])  || 0 : 0;
+    const lon     = row ? parseFloat(row['longitude']) || 0 : 0;
     const country = row ? (row['country']?.trim() || 'FR') : 'FR';
     const sncfId  = row ? (row['sncf_id']?.trim()  || '')  : '';
 
-    // Construire les stop IDs SNCF attendus par server.js
-    // Format : SNCF:StopArea:OCE + uic8
     const stopIds = [`SNCF:StopArea:OCE${uic8}`];
 
     stations.push({
@@ -284,9 +280,7 @@ function buildStations(iataNames, uicToIata, csvRows) {
     });
   }
 
-  // Tri alphabétique
   stations.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-
   console.log(`  Stations TGVmax : ${stations.length}`);
   return stations;
 }
@@ -332,21 +326,25 @@ async function main() {
     process.exit(1);
   }
 
-  // ── 1. Téléchargement ───────────────────────────────────────────────────────
+  // ── 1. Téléchargement via export URL (un seul appel) ────────────────────────
   const today = new Date().toISOString().slice(0, 10);
   const end   = new Date(Date.now() + MAX_DAYS * 86400000).toISOString().slice(0, 10);
   const where = `date >= '${today}' AND date <= '${end}'`;
-  console.log(`── 1. Téléchargement TGVmax (${today} → ${end}) ──────────────────────`);
 
-  const t0      = Date.now();
-  const records = await fetchAllRecords(where);
+  console.log(`── 1. Téléchargement TGVmax (${today} → ${end}) ──────────────────────`);
+  console.log('  Endpoint : export JSON (un seul appel, pas de pagination)\n');
+
+  const exportUrl = buildExportUrl(where);
+  const t0        = Date.now();
+  const records   = await fetchExport(exportUrl);
+
   console.log(`  Records reçus : ${records.length.toLocaleString()}\n`);
 
   if (records.length === 0) { console.warn('  Aucun record.'); return; }
 
   if (args.raw) {
     fs.writeFileSync(RAW_FILE, JSON.stringify(records, null, 2));
-    console.log(`  ✓ tgvmax_raw.json sauvegardé (${(fs.statSync(RAW_FILE).size/1024/1024).toFixed(1)} MB)\n`);
+    console.log(`  ✓ tgvmax_raw.json sauvegardé (${(fs.statSync(RAW_FILE).size / 1024 / 1024).toFixed(1)} MB)\n`);
   }
 
   // ── 2. Construction de l'index ──────────────────────────────────────────────
