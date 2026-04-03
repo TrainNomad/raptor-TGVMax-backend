@@ -27,7 +27,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      # Génère package-lock.json s'il est absent et le committe sur main
+      - name: Generate package-lock.json if missing
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "⚠️  package-lock.json absent — génération..."
+            npm install --package-lock-only
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore: add package-lock.json [skip ci]"
+            git push origin HEAD
+            echo "✅  package-lock.json commité sur main"
+          else
+            echo "✅  package-lock.json déjà présent"
+          fi
 
       - name: Install dependencies
         run: npm install --omit=dev
