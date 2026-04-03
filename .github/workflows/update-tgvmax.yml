@@ -1,14 +1,91 @@
-name: Update TGVmax Daily
+name: Update TGVmax Data
+
+permissions:
+  contents: write  # Autorise le bot à faire des push
 
 on:
   schedule:
-    - cron: '30 7 * * *'  # Chaque jour à 7h30 UTC (données SNCF mises à jour vers 6h20)
-  workflow_dispatch:        # Permet aussi de le lancer manuellement
+    # Tous les jours à 7h30 UTC (données SNCF mises à jour vers 6h20)
+    - cron: '30 7 * * *'
+  # Permet de déclencher manuellement depuis l'onglet Actions
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  update-tgvmax:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      - name: Trigger Render redeploy (TGVmax)
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Node.js ───────────────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --omit=dev
+
+      # ── 3. Téléchargement stations.csv (Trainline) ───────────────────────────
+      - name: Download stations.csv
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL_TGVMAX }}"
+          curl -fsSL \
+            "https://raw.githubusercontent.com/trainline-eu/stations/master/stations.csv" \
+            -o stations.csv
+          echo "✅ stations.csv téléchargé ($(wc -l < stations.csv) lignes)"
+
+      # ── 4. Téléchargement + build TGVmax ─────────────────────────────────────
+      - name: Download & build TGVmax index
+        env:
+          NODE_OPTIONS: "--max-old-space-size=1024"
+        run: |
+          node build-tgvmax.js --out ./engine_data --csv ./stations.csv --days 33
+
+      # ── 5. Vérification que engine_data est non vide ─────────────────────────
+      - name: Verify engine_data
+        run: |
+          echo "=== Contenu engine_data/ ==="
+          ls -lh engine_data/
+          for f in tgvmax_index.json uic_to_iata.json stations.json; do
+            if [ ! -f "engine_data/$f" ]; then
+              echo "❌  Fichier manquant : engine_data/$f"
+              exit 1
+            fi
+          done
+          echo "✅  Tous les fichiers critiques présents"
+          echo "=== Tailles ==="
+          du -sh engine_data/*.json 2>/dev/null | sort -h
+
+      # ── 6. Configuration git ─────────────────────────────────────────────────
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # ── 7. Push engine_data sur la branche deploy ────────────────────────────
+      # Render surveille cette branche et redéploie automatiquement à chaque push.
+      - name: Push engine_data to deploy branch
+        run: |
+          git fetch origin deploy 2>/dev/null || true
+          git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
+
+          # Rebase sur main pour garder le code source à jour
+          git merge origin/main --no-edit --strategy-option=ours
+
+          # Forcer l'inclusion de engine_data (peut être dans .gitignore)
+          git add -f engine_data/tgvmax_index.json engine_data/uic_to_iata.json engine_data/stations.json
+
+          if git diff --staged --quiet; then
+            echo "ℹ️  Aucun changement dans engine_data — pas de push"
+          else
+            DATESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            git commit -m "chore: update tgvmax engine_data [${DATESTAMP}]"
+            git push origin deploy --force-with-lease
+            echo "✅  engine_data poussé sur la branche deploy"
+          fi
