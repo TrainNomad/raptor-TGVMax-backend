@@ -56,11 +56,8 @@ jobs:
           echo "✅ stations.csv téléchargé ($(wc -l < stations.csv) lignes)"
 
       # ── 4. Téléchargement + build TGVmax ─────────────────────────────────────
-      - name: Download & build TGVmax index
-        env:
-          NODE_OPTIONS: "--max-old-space-size=1024"
-        run: |
-          node build-tgvmax.js --out ./engine_data --csv ./stations.csv --days 33
+      - name: Run Ingestion
+        run: node tgvmax-ingest.js ./operators.json ./engine_data ./stations.csv
 
       # ── 5. Vérification que engine_data est non vide ─────────────────────────
       - name: Verify engine_data
