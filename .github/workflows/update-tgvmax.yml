@@ -64,16 +64,15 @@ jobs:
         run: |
           echo "=== Contenu engine_data/ ==="
           ls -lh engine_data/
-          for f in tgvmax_index.json uic_to_iata.json stations.json; do
+          # On vérifie les fichiers que tgvmax-ingest.js vient de créer
+          for f in trips.json stops.json calendar_index.json meta.json; do
             if [ ! -f "engine_data/$f" ]; then
               echo "❌  Fichier manquant : engine_data/$f"
               exit 1
             fi
           done
-          echo "✅  Tous les fichiers critiques présents"
-          echo "=== Tailles ==="
-          du -sh engine_data/*.json 2>/dev/null | sort -h
-
+          echo "✅  Tous les fichiers requis pour le serveur sont présents"
+          
       # ── 6. Configuration git ─────────────────────────────────────────────────
       - name: Configure git
         run: |
