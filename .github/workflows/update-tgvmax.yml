@@ -1,11 +1,13 @@
 name: Update TGVmax Data
 
 permissions:
-  contents: write
+  contents: write  # Autorise le bot à faire des push
 
 on:
   schedule:
+    # Tous les jours à 7h30 UTC (données SNCF mises à jour vers 6h20)
     - cron: '30 7 * * *'
+  # Permet de déclencher manuellement depuis l'onglet Actions
   workflow_dispatch:
 
 jobs:
@@ -14,60 +16,91 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ── 2. Node.js ───────────────────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      # Génère package-lock.json s'il est absent et le committe sur main
+      - name: Generate package-lock.json if missing
         run: |
-          if [ -f package.json ]; then
-            npm install
+          if [ ! -f package-lock.json ]; then
+            echo "⚠️  package-lock.json absent — génération..."
+            npm install --package-lock-only
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore: add package-lock.json [skip ci]"
+            git push origin HEAD
+            echo "✅  package-lock.json commité sur main"
+          else
+            echo "✅  package-lock.json déjà présent"
           fi
 
-      # On utilise tgvmax-ingest.js car server.js attend trips.json et stops.json
-      - name: Run Ingestion
-        run: node tgvmax-ingest.js
-        env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
+      - name: Install dependencies
+        run: npm install --omit=dev
 
-      # Vérification que les fichiers attendus par server.js sont là
-      - name: Check generated files
+      # ── 3. Téléchargement stations.csv (Trainline) ───────────────────────────
+      - name: Download stations.csv
         run: |
-          ls -lh engine_data/
-          test -f engine_data/trips.json || exit 1
-          test -f engine_data/stops.json || exit 1
-          test -f engine_data/meta.json || exit 1
-          echo "✅ Fichiers critiques générés avec succès"
+          curl -fsSL \
+            "https://raw.githubusercontent.com/trainline-eu/stations/master/stations.csv" \
+            -o stations.csv
+          echo "✅ stations.csv téléchargé ($(wc -l < stations.csv) lignes)"
 
+      # ── 4. Téléchargement + build TGVmax ─────────────────────────────────────
+      - name: Download & build TGVmax index
+        env:
+          NODE_OPTIONS: "--max-old-space-size=1024"
+        run: |
+          node build-tgvmax.js --out ./engine_data --csv ./stations.csv --days 33
+
+      # ── 5. Vérification que engine_data est non vide ─────────────────────────
+      - name: Verify engine_data
+        run: |
+          echo "=== Contenu engine_data/ ==="
+          ls -lh engine_data/
+          for f in tgvmax_index.json uic_to_iata.json stations.json; do
+            if [ ! -f "engine_data/$f" ]; then
+              echo "❌  Fichier manquant : engine_data/$f"
+              exit 1
+            fi
+          done
+          echo "✅  Tous les fichiers critiques présents"
+          echo "=== Tailles ==="
+          du -sh engine_data/*.json 2>/dev/null | sort -h
+
+      # ── 6. Configuration git ─────────────────────────────────────────────────
       - name: Configure git
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Push to deploy branch
+      # ── 7. Push engine_data sur la branche deploy ────────────────────────────
+      # Render surveille cette branche et redéploie automatiquement à chaque push.
+      - name: Push engine_data to deploy branch
         run: |
           git fetch origin deploy 2>/dev/null || true
           git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
-          
-          # On fusionne main pour garder le code à jour
+
+          # Rebase sur main pour garder le code source à jour
           git merge origin/main --no-edit --strategy-option=ours
 
-          # CRUCIAL : On ajoute TOUS les fichiers dont server.js a besoin
-          git add -f engine_data/trips.json \
-                 engine_data/stops.json \
-                 engine_data/routes_by_stop.json \
-                 engine_data/calendar_index.json \
-                 engine_data/meta.json
+          # Forcer l'inclusion de engine_data (peut être dans .gitignore)
+          git add -f engine_data/tgvmax_index.json engine_data/uic_to_iata.json engine_data/stations.json
 
           if git diff --staged --quiet; then
-            echo "ℹ️ Aucun changement dans les données"
+            echo "ℹ️  Aucun changement dans engine_data — pas de push"
           else
-            git commit -m "chore: update tgvmax data $(date -u +'%Y-%m-%d')"
-            git push origin deploy --force
+            DATESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            git commit -m "chore: update tgvmax engine_data [${DATESTAMP}]"
+            git push origin deploy --force-with-lease
+            echo "✅  engine_data poussé sur la branche deploy"
           fi
