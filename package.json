@@ -5,10 +5,10 @@
     "node": ">=18"
   },
   "scripts": {
-    "ingest": "node tgvmax-ingest.js",
+    "ingest":   "node tgvmax-ingest.js",
     "stations": "node build-stations-index.js",
-    "build": "node tgvmax-ingest.js && node build-stations-index.js",
-    "start": "node --max-old-space-size=450 server.js",
+    "build":    "node tgvmax-ingest.js && node build-stations-index.js",
+    "start":    "node --max-old-space-size=450 server.js",
     "start:full": "node --max-old-space-size=600 server-fusion.js"
   },
   "dependencies": {

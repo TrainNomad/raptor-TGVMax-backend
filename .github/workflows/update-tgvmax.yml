@@ -38,25 +38,28 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/trainline-eu/stations/master/stations.csv" -o stations.csv
           echo "✅ stations.csv prêt"
 
-      # ── 4. Génération des données avec tgvmax-ingest.js ──────────────────────
-      # Ce script crée les fichiers trips.json, stops.json, etc.
-      - name: Run Ingestion
-        run: node tgvmax-ingest.js ./operators.json ./engine_data ./stations.csv
+      # ── 4. Ingestion + construction de l'index des gares ─────────────────────
+      # npm run build = tgvmax-ingest.js PUIS build-stations-index.js
+      - name: Run Build (ingest + stations index)
+        run: npm run build
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
-      # ── 5. Vérification des fichiers (Adapté à ton serveur) ──────────────────
-      - name: Verify engine_data
+      # ── 5. Vérification des fichiers critiques ────────────────────────────────
+      - name: Verify outputs
         run: |
           echo "=== Contenu de engine_data/ ==="
           ls -lh engine_data/
-          # On vérifie les fichiers dont server.js a besoin pour ne pas être en 503
           for f in trips.json stops.json calendar_index.json meta.json; do
             if [ ! -f "engine_data/$f" ]; then
               echo "❌ Fichier critique manquant : engine_data/$f"
               exit 1
             fi
           done
+          if [ ! -f "stations.json" ]; then
+            echo "❌ stations.json manquant à la racine"
+            exit 1
+          fi
           echo "✅ Tous les fichiers nécessaires sont présents"
 
       # ── 6. Configuration Git ─────────────────────────────────────────────────
@@ -70,19 +73,21 @@ jobs:
         run: |
           git fetch origin deploy 2>/dev/null || true
           git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
-          
-          # On fusionne main pour avoir le dernier code du serveur
+
+          # Fusionner main pour avoir le dernier code du serveur
           git merge origin/main --no-edit --strategy-option=ours
 
-          # On ajoute TOUS les fichiers JSON (trips, stops, etc.)
+          # Fichiers engine_data/ (trips, stops, routes, calendar, meta)
           git add -f engine_data/*.json
+          # stations.json à la racine (utilisé par server.js pour l'autocomplétion)
+          git add -f stations.json
+          # stations.csv (utilisé par build-stations-index.js)
           git add stations.csv
 
           if git diff --staged --quiet; then
             echo "ℹ️ Aucun changement détecté"
           else
             git commit -m "chore: update tgvmax data $(date -u +'%Y-%m-%d %H:%M')"
-            # Le push vers deploy déclenchera automatiquement le redéploiement Render
             git push origin deploy --force
             echo "✅ Données poussées avec succès"
           fi
