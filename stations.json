@@ -1,257 +1,409 @@
 [
   {
-    "name": "Aeroport Roissy Cdg 2 Tgv",
-    "city": "Aeroport Roissy Cdg 2 Tgv",
+    "id": "FR:albi",
+    "name": "Albi",
+    "city": "Albi",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aeroport_roissy_cdg_2_tgv"
+      "FRALM",
+      "FRALB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.933333,
+    "lon": 2.15
   },
   {
+    "id": "FR:avignon",
+    "name": "Avignon",
+    "city": "Avignon",
+    "country": "FR",
+    "stopIds": [
+      "FRAVV",
+      "FRAVI"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.95,
+    "lon": 4.816667
+  },
+  {
+    "id": "FR:lyon",
+    "name": "Lyon",
+    "city": "Lyon",
+    "country": "FR",
+    "stopIds": [
+      "FRLVI",
+      "FRSXA"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 45.767658,
+    "lon": 4.834907
+  },
+  {
+    "id": "FR:marseille",
+    "name": "Marseille",
+    "city": "Marseille",
+    "country": "FR",
+    "stopIds": [
+      "FRMSC",
+      "FRMBC"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.29641,
+    "lon": 5.371
+  },
+  {
+    "id": "FR:montpellier",
+    "name": "Montpellier",
+    "city": "Montpellier",
+    "country": "FR",
+    "stopIds": [
+      "FRMSF",
+      "FRMPL"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.599449,
+    "lon": 3.896182
+  },
+  {
+    "id": "FR:nimes",
+    "name": "Nimes",
+    "city": "Nimes",
+    "country": "FR",
+    "stopIds": [
+      "FRNMS",
+      "FRNIM"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.836678,
+    "lon": 4.360022
+  },
+  {
+    "id": "FR:aeroport-paris-roissy-charles-de-gaulle-cdg-t2",
+    "name": "Aeroport Paris Roissy Charles de Gaulle Cdg T2",
+    "city": "Aeroport Paris Roissy Charles de Gaulle Cdg T2",
+    "country": "FR",
+    "stopIds": [
+      "FRRYT"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 49.003652,
+    "lon": 2.570892
+  },
+  {
+    "id": "FR:agde",
     "name": "Agde",
     "city": "Agde",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:agde"
+      "FRAGD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.31728,
+    "lon": 3.466203
   },
   {
+    "id": "FR:agen",
     "name": "Agen",
     "city": "Agen",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:agen"
+      "FRAGN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.208311,
+    "lon": 0.620932
   },
   {
-    "name": "Aime La Plagne",
-    "city": "Aime La Plagne",
+    "id": "FR:aime-la-plagne",
+    "name": "Aime la Plagne",
+    "city": "Aime la Plagne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aime_la_plagne"
+      "FRANJ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.5544,
+    "lon": 6.648646
   },
   {
-    "name": "Aix En Provence Tgv",
-    "city": "Aix En Provence Tgv",
+    "id": "FR:aix-en-provence-tgv",
+    "name": "Aix en Provence Tgv",
+    "city": "Aix en Provence Tgv",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aix_en_provence_tgv"
+      "FRAXV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.455237,
+    "lon": 5.317534
   },
   {
-    "name": "Aix Les Bains Le Revard",
-    "city": "Aix Les Bains Le Revard",
+    "id": "FR:aix-les-bains-le-revard",
+    "name": "Aix les Bains le Revard",
+    "city": "Aix les Bains le Revard",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aix_les_bains_le_revard"
+      "FRAIX"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.688161,
+    "lon": 5.909371
   },
   {
+    "id": "FR:albertville",
     "name": "Albertville",
     "city": "Albertville",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:albertville"
+      "FRALV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.672977,
+    "lon": 6.383167
   },
   {
-    "name": "Angers Saint Laud",
-    "city": "Angers Saint Laud",
+    "id": "FR:amiens",
+    "name": "Amiens",
+    "city": "Amiens",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:angers_saint_laud"
+      "FRAMS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.890746,
+    "lon": 2.312592
   },
   {
+    "id": "FR:ancenis",
+    "name": "Ancenis",
+    "city": "Ancenis",
+    "country": "FR",
+    "stopIds": [
+      "FRANC"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 47.369334,
+    "lon": -1.177763
+  },
+  {
+    "id": "FR:angers",
+    "name": "Angers",
+    "city": "Angers",
+    "country": "FR",
+    "stopIds": [
+      "FRASL"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 47.466667,
+    "lon": -0.55
+  },
+  {
+    "id": "FR:angouleme",
     "name": "Angouleme",
     "city": "Angouleme",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:angouleme"
+      "FRANG"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.653572,
+    "lon": 0.164608
   },
   {
+    "id": "FR:annecy",
     "name": "Annecy",
     "city": "Annecy",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:annecy"
+      "FRANY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.901965,
+    "lon": 6.121835
   },
   {
+    "id": "FR:annemasse",
     "name": "Annemasse",
     "city": "Annemasse",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:annemasse"
+      "FRANE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.199222,
+    "lon": 6.23652
   },
   {
+    "id": "FR:antibes",
     "name": "Antibes",
     "city": "Antibes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:antibes"
+      "FRATB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.585784,
+    "lon": 7.119498
   },
   {
+    "id": "FR:arcachon",
     "name": "Arcachon",
     "city": "Arcachon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:arcachon"
+      "FRARC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.659009,
+    "lon": -1.16523
   },
   {
-    "name": "Argeles Sur Mer",
-    "city": "Argeles Sur Mer",
+    "id": "FR:argeles-sur-mer",
+    "name": "Argeles sur Mer",
+    "city": "Argeles sur Mer",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:argeles_sur_mer"
+      "FRAMR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.54397,
+    "lon": 3.022349
   },
   {
-    "name": "Argenton Sur Creuse",
-    "city": "Argenton Sur Creuse",
+    "id": "FR:argenton-sur-creuse",
+    "name": "Argenton sur Creuse",
+    "city": "Argenton sur Creuse",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:argenton_sur_creuse"
+      "FRAGC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.583333,
+    "lon": 1.516667
   },
   {
+    "id": "FR:arles",
     "name": "Arles",
     "city": "Arles",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:arles"
+      "FRARS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.684853,
+    "lon": 4.63203
   },
   {
+    "id": "FR:arras",
     "name": "Arras",
     "city": "Arras",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:arras"
+      "FRARR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.286673,
+    "lon": 2.781942
   },
   {
+    "id": "FR:arvant",
     "name": "Arvant",
     "city": "Arvant",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:arvant"
+      "FRARV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.36538,
+    "lon": 3.310675
   },
   {
+    "id": "FR:assier",
     "name": "Assier",
     "city": "Assier",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:assier"
+      "FRAER"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.666667,
+    "lon": 1.883333
   },
   {
+    "id": "FR:aubin",
     "name": "Aubin",
     "city": "Aubin",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aubin"
+      "FRAVB"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.527276,
+    "lon": 2.239313
+  },
+  {
+    "id": "FR:augsburg-hbf",
+    "name": "Augsburg Hbf",
+    "city": "Augsburg Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:augsburg_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -260,50 +412,54 @@
     "lon": 0
   },
   {
+    "id": "FR:aumont-aubrac",
     "name": "Aumont Aubrac",
     "city": "Aumont Aubrac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aumont_aubrac"
+      "FRAAU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.71817,
+    "lon": 3.283549
   },
   {
+    "id": "FR:auray",
     "name": "Auray",
     "city": "Auray",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:auray"
+      "FRARY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.68022,
+    "lon": -2.999995
   },
   {
+    "id": "FR:aurillac",
     "name": "Aurillac",
     "city": "Aurillac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:aurillac"
+      "FRAUC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.921092,
+    "lon": 2.435655
   },
   {
-    "name": "Avignon Centre",
-    "city": "Avignon Centre",
+    "id": "FR:baden-baden",
+    "name": "Baden Baden",
+    "city": "Baden Baden",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:avignon_centre"
+      "TGVMAX:baden_baden"
     ],
     "operators": [
       "TGVMAX"
@@ -312,50 +468,54 @@
     "lon": 0
   },
   {
-    "name": "Avignon Tgv",
-    "city": "Avignon Tgv",
+    "id": "FR:banassac-la-canourgue",
+    "name": "Banassac la Canourgue",
+    "city": "Banassac la Canourgue",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:avignon_tgv"
+      "FRBAA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.447763,
+    "lon": 3.195852
   },
   {
-    "name": "Banassac La Canourgue",
-    "city": "Banassac La Canourgue",
+    "id": "FR:banyuls-sur-mer",
+    "name": "Banyuls sur Mer",
+    "city": "Banyuls sur Mer",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:banassac_la_canourgue"
+      "FRBAN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.482958,
+    "lon": 3.12505
   },
   {
-    "name": "Banyuls Sur Mer",
-    "city": "Banyuls Sur Mer",
+    "id": "FR:bar-le-duc",
+    "name": "Bar le Duc",
+    "city": "Bar le Duc",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:banyuls_sur_mer"
+      "FRBLD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.773308,
+    "lon": 5.166822
   },
   {
-    "name": "Bar Le Duc",
-    "city": "Bar Le Duc",
+    "id": "FR:barcelona-sants",
+    "name": "Barcelona Sants",
+    "city": "Barcelona Sants",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bar_le_duc"
+      "TGVMAX:barcelona_sants"
     ],
     "operators": [
       "TGVMAX"
@@ -364,76 +524,96 @@
     "lon": 0
   },
   {
+    "id": "FR:basel-sbb",
+    "name": "Basel Sbb",
+    "city": "Basel Sbb",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:basel_sbb"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:bayonne",
     "name": "Bayonne",
     "city": "Bayonne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bayonne"
+      "FRBYE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.496801,
+    "lon": -1.470306
   },
   {
+    "id": "FR:beaune",
     "name": "Beaune",
     "city": "Beaune",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:beaune"
+      "FRBEA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.023053,
+    "lon": 4.848379
   },
   {
+    "id": "FR:bedarieux",
     "name": "Bedarieux",
     "city": "Bedarieux",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bedarieux"
+      "FRBED"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.608697,
+    "lon": 3.149569
   },
   {
-    "name": "Belfort Montbeliard Tgv",
-    "city": "Belfort Montbeliard Tgv",
+    "id": "FR:belfort-montbeliard",
+    "name": "Belfort Montbeliard",
+    "city": "Belfort Montbeliard",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:belfort_montbeliard_tgv"
+      "FRBFB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.585937,
+    "lon": 6.897687
   },
   {
-    "name": "Bellegarde Sur Valserine Gare",
-    "city": "Bellegarde Sur Valserine Gare",
+    "id": "FR:bellegarde-sur-valserine",
+    "name": "Bellegarde sur Valserine",
+    "city": "Bellegarde sur Valserine",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bellegarde_sur_valserine_gare"
+      "FRBGD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.107874,
+    "lon": 5.824213
   },
   {
-    "name": "Besancon Franche Comte Tgv",
-    "city": "Besancon Franche Comte Tgv",
+    "id": "FR:berlin-gesundbrunnen",
+    "name": "Berlin Gesundbrunnen",
+    "city": "Berlin Gesundbrunnen",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:besancon_franche_comte_tgv"
+      "TGVMAX:berlin_gesundbrunnen"
     ],
     "operators": [
       "TGVMAX"
@@ -442,58 +622,105 @@
     "lon": 0
   },
   {
+    "id": "FR:berlin-hbf",
+    "name": "Berlin Hbf",
+    "city": "Berlin Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:berlin_hbf"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:berlin-sudkreuz",
+    "name": "Berlin Sudkreuz",
+    "city": "Berlin Sudkreuz",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:berlin_sudkreuz"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:besancon-franche-comte",
+    "name": "Besancon Franche Comte",
+    "city": "Besancon Franche Comte",
+    "country": "FR",
+    "stopIds": [
+      "FRBFC"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 47.307361,
+    "lon": 5.953195
+  },
+  {
+    "id": "FR:besancon-viotte",
     "name": "Besancon Viotte",
     "city": "Besancon Viotte",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:besancon_viotte"
+      "FRBNV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.247019,
+    "lon": 6.022003
   },
   {
+    "id": "FR:bethune",
     "name": "Bethune",
     "city": "Bethune",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bethune"
+      "FRBET"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.52144,
+    "lon": 2.64055
   },
   {
+    "id": "FR:beziers",
     "name": "Beziers",
     "city": "Beziers",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:beziers"
+      "FRBZS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.33633,
+    "lon": 3.218873
   },
   {
+    "id": "FR:biarritz",
     "name": "Biarritz",
     "city": "Biarritz",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:biarritz"
+      "FRBIZ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.459397,
+    "lon": -1.545915
   },
   {
+    "id": "FR:biganos-facture",
     "name": "Biganos Facture",
     "city": "Biganos Facture",
     "country": "FR",
@@ -507,21 +734,37 @@
     "lon": 0
   },
   {
-    "name": "Bordeaux St Jean",
-    "city": "Bordeaux St Jean",
+    "id": "FR:blois",
+    "name": "Blois",
+    "city": "Blois",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bordeaux_st_jean"
+      "FRBLO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.585445,
+    "lon": 1.323823
   },
   {
-    "name": "Boulogne Ville",
-    "city": "Boulogne Ville",
+    "id": "FR:bordeaux",
+    "name": "Bordeaux",
+    "city": "Bordeaux",
+    "country": "FR",
+    "stopIds": [
+      "FRBXJ"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.837731,
+    "lon": -0.577431
+  },
+  {
+    "id": "FR:boulogne",
+    "name": "Boulogne",
+    "city": "Boulogne",
     "country": "FR",
     "stopIds": [
       "TGVMAX:boulogne_ville"
@@ -529,114 +772,123 @@
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.7157,
+    "lon": 1.60964
   },
   {
-    "name": "Bourg En Bresse",
-    "city": "Bourg En Bresse",
+    "id": "FR:bourg-en-bresse",
+    "name": "Bourg en Bresse",
+    "city": "Bourg en Bresse",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bourg_en_bresse"
+      "FRBGB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.200351,
+    "lon": 5.215063
   },
   {
-    "name": "Bourg Saint Maurice",
-    "city": "Bourg Saint Maurice",
+    "id": "FR:bourg-st-maurice",
+    "name": "Bourg St Maurice",
+    "city": "Bourg St Maurice",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bourg_saint_maurice"
+      "FRBSM"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.619036,
+    "lon": 6.771273
   },
   {
+    "id": "FR:bourges",
     "name": "Bourges",
     "city": "Bourges",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bourges"
+      "FRBGS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.094145,
+    "lon": 2.394255
   },
   {
-    "name": "Brassac Les Mines Ste Florine",
-    "city": "Brassac Les Mines Ste Florine",
+    "id": "FR:brassac-les-mines-ste-florine",
+    "name": "Brassac les Mines Ste Florine",
+    "city": "Brassac les Mines Ste Florine",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:brassac_les_mines_ste_florine"
+      "FRBLM"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.414246,
+    "lon": 3.330167
   },
   {
+    "id": "FR:brest",
     "name": "Brest",
     "city": "Brest",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:brest"
+      "FRBRT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.38811,
+    "lon": -4.478903
   },
   {
+    "id": "FR:bretenoux-biars",
     "name": "Bretenoux Biars",
     "city": "Bretenoux Biars",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:bretenoux_biars"
+      "FRBXB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.927369,
+    "lon": 1.843687
   },
   {
+    "id": "FR:briancon",
     "name": "Briancon",
     "city": "Briancon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:briancon"
+      "FRBRI"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.889853,
+    "lon": 6.633007
   },
   {
-    "name": "Brive La Gaillarde",
-    "city": "Brive La Gaillarde",
+    "id": "FR:brive",
+    "name": "Brive",
+    "city": "Brive",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:brive_la_gaillarde"
+      "FRBLG"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.152618,
+    "lon": 1.528655
   },
   {
+    "id": "FR:bruxelles-midi",
     "name": "Bruxelles Midi",
     "city": "Bruxelles Midi",
     "country": "FR",
@@ -650,453 +902,544 @@
     "lon": 0
   },
   {
+    "id": "FR:cahors",
     "name": "Cahors",
     "city": "Cahors",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:cahors"
+      "FRCAH"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.449275,
+    "lon": 1.433325
   },
   {
+    "id": "FR:calais",
+    "name": "Calais",
+    "city": "Calais",
+    "country": "FR",
+    "stopIds": [
+      "FRCSV"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 50.953453,
+    "lon": 1.850595
+  },
+  {
+    "id": "FR:calais-frethun",
     "name": "Calais Frethun",
     "city": "Calais Frethun",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:calais_frethun"
+      "FRFHS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.902585,
+    "lon": 1.811286
   },
   {
+    "id": "FR:campagnac-st-geniez",
     "name": "Campagnac St Geniez",
     "city": "Campagnac St Geniez",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:campagnac_st_geniez"
+      "FRCNT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.421956,
+    "lon": 3.066401
   },
   {
+    "id": "FR:cannes",
     "name": "Cannes",
     "city": "Cannes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:cannes"
+      "FRCAN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.55,
+    "lon": 7.016667
   },
   {
+    "id": "FR:capdenac",
     "name": "Capdenac",
     "city": "Capdenac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:capdenac"
+      "FRCDC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.578246,
+    "lon": 2.077963
   },
   {
+    "id": "FR:carcassonne",
     "name": "Carcassonne",
     "city": "Carcassonne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:carcassonne"
+      "FRCNE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.218029,
+    "lon": 2.351824
   },
   {
+    "id": "FR:carmaux",
+    "name": "Carmaux",
+    "city": "Carmaux",
+    "country": "FR",
+    "stopIds": [
+      "FRCMX"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.048782,
+    "lon": 2.152401
+  },
+  {
+    "id": "FR:caussade",
     "name": "Caussade",
     "city": "Caussade",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:caussade_tarn_et_garonne"
+      "FRCSD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.162267,
+    "lon": 1.533654
   },
   {
+    "id": "FR:ceilhes-roqueredonde",
     "name": "Ceilhes Roqueredonde",
     "city": "Ceilhes Roqueredonde",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:ceilhes_roqueredonde"
+      "FRCOQ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.812266,
+    "lon": 3.155158
   },
   {
+    "id": "FR:cerbere",
     "name": "Cerbere",
     "city": "Cerbere",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:cerbere"
+      "FRCER"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.441773,
+    "lon": 3.163403
   },
   {
-    "name": "Chalon Sur Saone",
-    "city": "Chalon Sur Saone",
+    "id": "FR:chalon-sur-saone",
+    "name": "Chalon sur Saone",
+    "city": "Chalon sur Saone",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:chalon_sur_saone"
+      "FRCSS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.781612,
+    "lon": 4.843454
   },
   {
-    "name": "Chalons En Champagne",
-    "city": "Chalons En Champagne",
+    "id": "FR:chalons-en-champagne",
+    "name": "Chalons en Champagne",
+    "city": "Chalons en Champagne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:chalons_en_champagne"
+      "FRCMP"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.833333,
+    "lon": 4.083333
   },
   {
-    "name": "Chambery Challes Les Eaux",
-    "city": "Chambery Challes Les Eaux",
+    "id": "FR:chambery-challes-les-eaux",
+    "name": "Chambery Challes les Eaux",
+    "city": "Chambery Challes les Eaux",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:chambery_challes_les_eaux"
+      "FRCRL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.571302,
+    "lon": 5.919547
   },
   {
-    "name": "Champagne Ardenne Tgv",
-    "city": "Champagne Ardenne Tgv",
+    "id": "FR:champagne-ardenne",
+    "name": "Champagne Ardenne",
+    "city": "Champagne Ardenne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:champagne_ardenne_tgv"
+      "FRCGV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.214806,
+    "lon": 3.994632
   },
   {
+    "id": "FR:charleville-mezieres",
     "name": "Charleville Mezieres",
     "city": "Charleville Mezieres",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:charleville_mezieres"
+      "FRCMZ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.767915,
+    "lon": 4.724952
   },
   {
+    "id": "FR:chartres",
+    "name": "Chartres",
+    "city": "Chartres",
+    "country": "FR",
+    "stopIds": [
+      "FRCHH"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.446853,
+    "lon": 1.489248
+  },
+  {
+    "id": "FR:chateauroux",
     "name": "Chateauroux",
     "city": "Chateauroux",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:chateauroux"
+      "FRCTX"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.809737,
+    "lon": 1.699536
   },
   {
+    "id": "FR:chatellerault",
     "name": "Chatellerault",
     "city": "Chatellerault",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:chatellerault"
+      "FRCRT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.818594,
+    "lon": 0.549279
   },
   {
+    "id": "FR:chorges",
     "name": "Chorges",
     "city": "Chorges",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:chorges"
+      "FRCHO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.545842,
+    "lon": 6.271889
   },
   {
+    "id": "FR:clermont-ferrand",
     "name": "Clermont Ferrand",
     "city": "Clermont Ferrand",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:clermont_ferrand"
+      "FRCLF"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.778945,
+    "lon": 3.100543
   },
   {
-    "name": "Cluses",
-    "city": "Cluses",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:cluses_haute_savoie"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:collioure",
     "name": "Collioure",
     "city": "Collioure",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:collioure"
+      "FRCOX"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.526944,
+    "lon": 3.078232
   },
   {
+    "id": "FR:colmar",
     "name": "Colmar",
     "city": "Colmar",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:colmar"
+      "FRCMR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.073201,
+    "lon": 7.346967
   },
   {
+    "id": "FR:commercy",
+    "name": "Commercy",
+    "city": "Commercy",
+    "country": "FR",
+    "stopIds": [
+      "FRCCY"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.765749,
+    "lon": 5.58861
+  },
+  {
+    "id": "FR:cransac",
     "name": "Cransac",
     "city": "Cransac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:cransac"
+      "FRCRZ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.522951,
+    "lon": 2.271867
   },
   {
+    "id": "FR:crest",
     "name": "Crest",
     "city": "Crest",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:crest"
+      "FRCRE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.730155,
+    "lon": 5.016097
   },
   {
+    "id": "FR:croix-wasquehal",
+    "name": "Croix Wasquehal",
+    "city": "Croix Wasquehal",
+    "country": "FR",
+    "stopIds": [
+      "FRCRW"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 50.678557,
+    "lon": 3.138032
+  },
+  {
+    "id": "FR:culmont-chalindrey",
     "name": "Culmont Chalindrey",
     "city": "Culmont Chalindrey",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:culmont_chalindrey"
+      "FRCYN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.81009,
+    "lon": 5.443222
   },
   {
+    "id": "FR:dax",
     "name": "Dax",
     "city": "Dax",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:dax"
+      "FRDAX"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.720472,
+    "lon": -1.050301
   },
   {
+    "id": "FR:die",
     "name": "Die",
     "city": "Die",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:die"
+      "FRDIE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.758255,
+    "lon": 5.363205
   },
   {
-    "name": "Dijon Ville",
-    "city": "Dijon Ville",
+    "id": "FR:dijon",
+    "name": "Dijon",
+    "city": "Dijon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:dijon_ville"
+      "FRDJV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.323378,
+    "lon": 5.027125
   },
   {
-    "name": "Dol De Bretagne",
-    "city": "Dol De Bretagne",
+    "id": "FR:dol-de-bretagne",
+    "name": "Dol de Bretagne",
+    "city": "Dol de Bretagne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:dol_de_bretagne"
+      "FRDOL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.54425,
+    "lon": -1.750536
   },
   {
-    "name": "Dole Ville",
-    "city": "Dole Ville",
+    "id": "FR:dole",
+    "name": "Dole",
+    "city": "Dole",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:dole_ville"
+      "FRDLE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.1,
+    "lon": 5.5
   },
   {
+    "id": "FR:douai",
     "name": "Douai",
     "city": "Douai",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:douai"
+      "FRDOI"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.371677,
+    "lon": 3.089986
   },
   {
+    "id": "FR:dunkerque",
     "name": "Dunkerque",
     "city": "Dunkerque",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:dunkerque"
+      "FRDKQ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 51.03047,
+    "lon": 2.368961
   },
   {
+    "id": "FR:elne",
     "name": "Elne",
     "city": "Elne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:elne"
+      "FRELN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.597114,
+    "lon": 2.963585
   },
   {
+    "id": "FR:embrun",
     "name": "Embrun",
     "city": "Embrun",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:embrun"
+      "FREMB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.567008,
+    "lon": 6.496773
   },
   {
+    "id": "FR:epinal",
     "name": "Epinal",
     "city": "Epinal",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:epinal"
+      "FRELP"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.178005,
+    "lon": 6.441787
   },
   {
-    "name": "Etaples   Le Touquet",
-    "city": "Etaples   Le Touquet",
+    "id": "FR:erfurt-hbf",
+    "name": "Erfurt Hbf",
+    "city": "Erfurt Hbf",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:etaples_le_touquet"
+      "TGVMAX:erfurt_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -1105,11 +1448,12 @@
     "lon": 0
   },
   {
-    "name": "Evian Les Bains",
-    "city": "Evian Les Bains",
+    "id": "FR:esslingen",
+    "name": "Esslingen",
+    "city": "Esslingen",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:evian_les_bains"
+      "TGVMAX:esslingen_neckar"
     ],
     "operators": [
       "TGVMAX"
@@ -1118,11 +1462,54 @@
     "lon": 0
   },
   {
+    "id": "FR:etaples-le-touquet",
+    "name": "Etaples le Touquet",
+    "city": "Etaples le Touquet",
+    "country": "FR",
+    "stopIds": [
+      "FRETA"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 50.51686,
+    "lon": 1.64231
+  },
+  {
+    "id": "FR:evian-les-bains",
+    "name": "Evian les Bains",
+    "city": "Evian les Bains",
+    "country": "FR",
+    "stopIds": [
+      "FREVI"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 46.397915,
+    "lon": 6.577457
+  },
+  {
+    "id": "FR:figeac",
     "name": "Figeac",
     "city": "Figeac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:figeac"
+      "FRFIG"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.6,
+    "lon": 2.033333
+  },
+  {
+    "id": "FR:figueres-vilafant",
+    "name": "Figueres Vilafant",
+    "city": "Figueres Vilafant",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:figueres_vilafant"
     ],
     "operators": [
       "TGVMAX"
@@ -1131,21 +1518,65 @@
     "lon": 0
   },
   {
+    "id": "FR:forbach",
+    "name": "Forbach",
+    "city": "Forbach",
+    "country": "FR",
+    "stopIds": [
+      "FRFOB"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 49.183333,
+    "lon": 6.9
+  },
+  {
+    "id": "FR:frankfurt-am-main-hbf",
+    "name": "Frankfurt Am Main Hbf",
+    "city": "Frankfurt Am Main Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:frankfurt_am_main_hbf"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:frankfurt-main-sud",
+    "name": "Frankfurt Main Sud",
+    "city": "Frankfurt Main Sud",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:frankfurt_main_sud"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:frasne",
     "name": "Frasne",
     "city": "Frasne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:frasne"
+      "FRFRA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.857596,
+    "lon": 6.157767
   },
   {
-    "name": "Freiburg (Breisgau) Hbf",
-    "city": "Freiburg (Breisgau) Hbf",
+    "id": "FR:freiburg-breisgau-hbf",
+    "name": "Freiburg Breisgau Hbf",
+    "city": "Freiburg Breisgau Hbf",
     "country": "FR",
     "stopIds": [
       "TGVMAX:freiburg_breisgau_hbf"
@@ -1157,24 +1588,54 @@
     "lon": 0
   },
   {
+    "id": "FR:fresnes-au-mont",
+    "name": "Fresnes Au Mont",
+    "city": "Fresnes Au Mont",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:fresnes_au_mont"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:futuroscope",
     "name": "Futuroscope",
     "city": "Futuroscope",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:futuroscope"
+      "FRFTU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.669918,
+    "lon": 0.377209
   },
   {
+    "id": "FR:gap",
     "name": "Gap",
     "city": "Gap",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:gap"
+      "FRGAP"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.563693,
+    "lon": 6.085638
+  },
+  {
+    "id": "FR:geneve-cornavin",
+    "name": "Geneve Cornavin",
+    "city": "Geneve Cornavin",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:geneve_cornavin"
     ],
     "operators": [
       "TGVMAX"
@@ -1183,50 +1644,82 @@
     "lon": 0
   },
   {
+    "id": "FR:girona",
+    "name": "Girona",
+    "city": "Girona",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:girona"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:gourdon",
     "name": "Gourdon",
     "city": "Gourdon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:gourdon"
+      "FRGOV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.741945,
+    "lon": 1.389237
   },
   {
+    "id": "FR:gramat",
     "name": "Gramat",
     "city": "Gramat",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:gramat"
+      "FRGRT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.773428,
+    "lon": 1.722303
   },
   {
+    "id": "FR:grenoble",
     "name": "Grenoble",
     "city": "Grenoble",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:grenoble"
+      "FRGRE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.191493,
+    "lon": 5.714584
   },
   {
+    "id": "FR:guingamp",
     "name": "Guingamp",
     "city": "Guingamp",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:guingamp"
+      "FRGGP"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.555659,
+    "lon": -3.143343
+  },
+  {
+    "id": "FR:halle-saale-hbf",
+    "name": "Halle Saale Hbf",
+    "city": "Halle Saale Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:halle_saale_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -1235,89 +1728,110 @@
     "lon": 0
   },
   {
+    "id": "FR:hazebrouck",
     "name": "Hazebrouck",
     "city": "Hazebrouck",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:hazebrouck"
+      "FRHZK"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.72501,
+    "lon": 2.54129
   },
   {
+    "id": "FR:hendaye",
     "name": "Hendaye",
     "city": "Hendaye",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:hendaye"
+      "FRHED"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.353132,
+    "lon": -1.781724
   },
   {
+    "id": "FR:hyeres",
     "name": "Hyeres",
     "city": "Hyeres",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:hyeres"
+      "FRHYE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.108867,
+    "lon": 6.124223
   },
   {
+    "id": "FR:issoire",
     "name": "Issoire",
     "city": "Issoire",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:issoire"
+      "FRISS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.543884,
+    "lon": 3.25398
   },
   {
+    "id": "FR:issoudun",
     "name": "Issoudun",
     "city": "Issoudun",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:issoudun"
+      "FRISK"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.948763,
+    "lon": 1.985834
   },
   {
+    "id": "FR:jonzac",
     "name": "Jonzac",
     "city": "Jonzac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:jonzac"
+      "FRJOH"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.438746,
+    "lon": -0.44164
   },
   {
-    "name": "L'Argentiere Les Ecrins",
-    "city": "L'Argentiere Les Ecrins",
+    "id": "FR:juvisy",
+    "name": "Juvisy",
+    "city": "Juvisy",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:l_argentiere_les_ecrins"
+      "FRJYS"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.68917,
+    "lon": 2.38267
+  },
+  {
+    "id": "FR:kaiserslautern-hbf",
+    "name": "Kaiserslautern Hbf",
+    "city": "Kaiserslautern Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:kaiserslautern_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -1326,71 +1840,105 @@
     "lon": 0
   },
   {
+    "id": "FR:karlsruhe-hbf",
+    "name": "Karlsruhe Hbf",
+    "city": "Karlsruhe Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:karlsruhe_hbf"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:l-argentiere-les-ecrins",
+    "name": "L Argentiere les Ecrins",
+    "city": "L Argentiere les Ecrins",
+    "country": "FR",
+    "stopIds": [
+      "FRLEE"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.79098,
+    "lon": 6.556416
+  },
+  {
+    "id": "FR:la-baule-escoublac",
     "name": "La Baule Escoublac",
     "city": "La Baule Escoublac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:la_baule_escoublac"
+      "FRLBE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.28869,
+    "lon": -2.389102
   },
   {
-    "name": "La Roche Sur Yon",
-    "city": "La Roche Sur Yon",
+    "id": "FR:la-roche-sur-yon",
+    "name": "La Roche sur Yon",
+    "city": "La Roche sur Yon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:la_roche_sur_yon"
+      "FRLRY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.67212,
+    "lon": -1.435621
   },
   {
+    "id": "FR:la-rochelle-ville",
     "name": "La Rochelle Ville",
     "city": "La Rochelle Ville",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:la_rochelle_ville"
+      "FRLRE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.15269,
+    "lon": -1.145305
   },
   {
+    "id": "FR:la-souterraine",
     "name": "La Souterraine",
     "city": "La Souterraine",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:la_souterraine"
+      "FRLST"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.239792,
+    "lon": 1.492151
   },
   {
+    "id": "FR:la-teste",
     "name": "La Teste",
     "city": "La Teste",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:la_teste"
+      "FRTTE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.636924,
+    "lon": -1.14295
   },
   {
+    "id": "FR:lahr-schwarzw",
     "name": "Lahr Schwarzw",
     "city": "Lahr Schwarzw",
     "country": "FR",
@@ -1404,76 +1952,96 @@
     "lon": 0
   },
   {
+    "id": "FR:lamballe",
     "name": "Lamballe",
     "city": "Lamballe",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lamballe"
+      "FRLAM"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.46606,
+    "lon": -2.511546
   },
   {
+    "id": "FR:landerneau",
     "name": "Landerneau",
     "city": "Landerneau",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:landerneau"
+      "FRLDO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.453572,
+    "lon": -4.256528
   },
   {
+    "id": "FR:landry",
     "name": "Landry",
     "city": "Landry",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:landry"
+      "FRLAY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.574171,
+    "lon": 6.733818
   },
   {
+    "id": "FR:lannemezan",
     "name": "Lannemezan",
     "city": "Lannemezan",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lannemezan"
+      "FRLNZ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.114273,
+    "lon": 0.387367
   },
   {
+    "id": "FR:lannion",
     "name": "Lannion",
     "city": "Lannion",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lannion"
+      "FRLNI"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.727638,
+    "lon": -3.460353
   },
   {
-    "name": "Laroquebrou Batiment Voyageurs",
-    "city": "Laroquebrou Batiment Voyageurs",
+    "id": "FR:laroquebrou",
+    "name": "Laroquebrou",
+    "city": "Laroquebrou",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:laroquebrou_batiment_voyageurs"
+      "FRLQB"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.964166,
+    "lon": 2.192917
+  },
+  {
+    "id": "FR:lausanne",
+    "name": "Lausanne",
+    "city": "Lausanne",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:lausanne"
     ],
     "operators": [
       "TGVMAX"
@@ -1482,266 +2050,315 @@
     "lon": 0
   },
   {
+    "id": "FR:laval",
     "name": "Laval",
     "city": "Laval",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:laval"
+      "FRLAL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.076206,
+    "lon": -0.760907
   },
   {
-    "name": "Le Bousquet D'Orb",
-    "city": "Le Bousquet D'Orb",
+    "id": "FR:le-bousquet-d-orb",
+    "name": "Le Bousquet D Orb",
+    "city": "Le Bousquet D Orb",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_bousquet_d_orb"
+      "FRLBD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.69121,
+    "lon": 3.168938
   },
   {
-    "name": "Le Creusot Montceau Montchanin",
-    "city": "Le Creusot Montceau Montchanin",
+    "id": "FR:le-creusot",
+    "name": "Le Creusot",
+    "city": "Le Creusot",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_creusot_montceau_montchanin"
+      "FRLCR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.807815,
+    "lon": 4.43044
   },
   {
+    "id": "FR:le-croisic",
     "name": "Le Croisic",
     "city": "Le Croisic",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_croisic"
+      "FRLCC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.289836,
+    "lon": -2.507442
   },
   {
+    "id": "FR:le-havre",
     "name": "Le Havre",
     "city": "Le Havre",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_havre"
+      "FRLHA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.492996,
+    "lon": 0.125677
   },
   {
+    "id": "FR:le-mans",
     "name": "Le Mans",
     "city": "Le Mans",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_mans"
+      "FRLEN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.995034,
+    "lon": 0.19014
   },
   {
+    "id": "FR:le-monastier",
     "name": "Le Monastier",
     "city": "Le Monastier",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_monastier"
+      "FRLMR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.508968,
+    "lon": 3.252057
   },
   {
+    "id": "FR:le-pouliguen",
     "name": "Le Pouliguen",
     "city": "Le Pouliguen",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:le_pouliguen"
+      "FRLIG"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.28254,
+    "lon": -2.433145
   },
   {
+    "id": "FR:lens",
     "name": "Lens",
     "city": "Lens",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lens"
+      "FRLNS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.426818,
+    "lon": 2.828254
   },
   {
+    "id": "FR:lerouville",
+    "name": "Lerouville",
+    "city": "Lerouville",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:lerouville_centre"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.797218,
+    "lon": 5.538705
+  },
+  {
+    "id": "FR:les-arcs-draguignan",
     "name": "Les Arcs Draguignan",
     "city": "Les Arcs Draguignan",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:les_arcs_draguignan"
+      "FRLAC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.455524,
+    "lon": 6.482498
   },
   {
-    "name": "Les Aubrais Orleans",
-    "city": "Les Aubrais Orleans",
+    "id": "FR:les-aubrais",
+    "name": "Les Aubrais",
+    "city": "Les Aubrais",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:les_aubrais_orleans"
+      "FRLAB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.926801,
+    "lon": 1.906629
   },
   {
-    "name": "Les Sables D'Olonne",
-    "city": "Les Sables D'Olonne",
+    "id": "FR:les-sables-d-olonne",
+    "name": "Les Sables D Olonne",
+    "city": "Les Sables D Olonne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:les_sables_d_olonne"
+      "FRLSO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.499917,
+    "lon": -1.78105
   },
   {
+    "id": "FR:libourne",
     "name": "Libourne",
     "city": "Libourne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:libourne"
+      "FRLIB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.915888,
+    "lon": -0.236344
   },
   {
+    "id": "FR:lille",
     "name": "Lille",
     "city": "Lille",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lille_intramuros"
+      "FRLLF"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.630402,
+    "lon": 3.070931
   },
   {
-    "name": "Limoges Benedictins",
-    "city": "Limoges Benedictins",
+    "id": "FR:limoges",
+    "name": "Limoges",
+    "city": "Limoges",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:limoges_benedictins"
+      "FRLIM"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.835722,
+    "lon": 1.265166
   },
   {
+    "id": "FR:lorient",
     "name": "Lorient",
     "city": "Lorient",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lorient"
+      "FRLRT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.755597,
+    "lon": -3.366221
   },
   {
-    "name": "Lorraine Tgv",
-    "city": "Lorraine Tgv",
+    "id": "FR:lorraine",
+    "name": "Lorraine",
+    "city": "Lorraine",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lorraine_tgv"
+      "FRTGL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.947773,
+    "lon": 6.169838
   },
   {
+    "id": "FR:lourdes",
     "name": "Lourdes",
     "city": "Lourdes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lourdes"
+      "FRLDS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.10037,
+    "lon": -0.042174
   },
   {
+    "id": "FR:luc-en-diois",
+    "name": "Luc en Diois",
+    "city": "Luc en Diois",
+    "country": "FR",
+    "stopIds": [
+      "FRLDE"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.613662,
+    "lon": 5.454623
+  },
+  {
+    "id": "FR:lucon",
     "name": "Lucon",
     "city": "Lucon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lucon"
+      "FRLRK"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.463823,
+    "lon": -1.167422
   },
   {
+    "id": "FR:luneville",
     "name": "Luneville",
     "city": "Luneville",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:luneville"
+      "FRLNE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.588233,
+    "lon": 6.49727
   },
   {
+    "id": "FR:luxembourg",
     "name": "Luxembourg",
     "city": "Luxembourg",
     "country": "FR",
@@ -1751,80 +2368,58 @@
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.8493,
+    "lon": 2.33
   },
   {
-    "name": "Lyon",
-    "city": "Lyon",
+    "id": "FR:macon-loche",
+    "name": "Macon Loche",
+    "city": "Macon Loche",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:lyon_intramuros"
+      "FRMLH"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.282884,
+    "lon": 4.778876
   },
   {
-    "name": "Lyon St Exupery Tgv.",
-    "city": "Lyon St Exupery Tgv.",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:lyon_st_exupery_tgv"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
-    "name": "Macon Loche Tgv",
-    "city": "Macon Loche Tgv",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:macon_loche_tgv"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:macon-ville",
     "name": "Macon Ville",
     "city": "Macon Ville",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:macon_ville"
+      "FRMAC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.302572,
+    "lon": 4.824887
   },
   {
+    "id": "FR:magalas",
     "name": "Magalas",
     "city": "Magalas",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:magalas"
+      "FRMGA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.4676,
+    "lon": 3.229542
   },
   {
-    "name": "Mantes La Jolie",
-    "city": "Mantes La Jolie",
+    "id": "FR:mannheim-hbf",
+    "name": "Mannheim Hbf",
+    "city": "Mannheim Hbf",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:mantes_la_jolie"
+      "TGVMAX:mannheim_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -1833,128 +2428,138 @@
     "lon": 0
   },
   {
+    "id": "FR:mantes",
+    "name": "Mantes",
+    "city": "Mantes",
+    "country": "FR",
+    "stopIds": [
+      "FRMTE"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.989448,
+    "lon": 1.703123
+  },
+  {
+    "id": "FR:marmande",
     "name": "Marmande",
     "city": "Marmande",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:marmande"
+      "FRMMD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.503019,
+    "lon": 0.168044
   },
   {
-    "name": "Marne La Vallee Chessy",
-    "city": "Marne La Vallee Chessy",
+    "id": "FR:marne-la-vallee-chessy",
+    "name": "Marne la Vallee Chessy",
+    "city": "Marne la Vallee Chessy",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:marne_la_vallee_chessy"
+      "FRMLV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.869856,
+    "lon": 2.78272
   },
   {
-    "name": "Marseille Blancarde",
-    "city": "Marseille Blancarde",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:marseille_blancarde"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
-    "name": "Marseille St Charles",
-    "city": "Marseille St Charles",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:marseille_st_charles"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:marvejols",
     "name": "Marvejols",
     "city": "Marvejols",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:marvejols"
+      "FRMVJ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.544682,
+    "lon": 3.281072
   },
   {
+    "id": "FR:massiac-blesle",
     "name": "Massiac Blesle",
     "city": "Massiac Blesle",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:massiac_blesle"
+      "FRMIA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.25377,
+    "lon": 3.196552
   },
   {
+    "id": "FR:massy-palaiseau",
     "name": "Massy Palaiseau",
     "city": "Massy Palaiseau",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:massy_palaiseau"
+      "FRMPU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.726421,
+    "lon": 2.257528
   },
   {
+    "id": "FR:massy-tgv",
     "name": "Massy Tgv",
     "city": "Massy Tgv",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:massy_tgv"
+      "FRMPW"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.725758,
+    "lon": 2.261254
   },
   {
-    "name": "Metz Ville",
-    "city": "Metz Ville",
+    "id": "FR:metz",
+    "name": "Metz",
+    "city": "Metz",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:metz_ville"
+      "FRMZE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.109545,
+    "lon": 6.176593
   },
   {
-    "name": "Meuse Tgv",
-    "city": "Meuse Tgv",
+    "id": "FR:meuse",
+    "name": "Meuse",
+    "city": "Meuse",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:meuse_tgv"
+      "FRTGM"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.978549,
+    "lon": 5.270954
+  },
+  {
+    "id": "FR:milano-porta-garibaldi",
+    "name": "Milano Porta Garibaldi",
+    "city": "Milano Porta Garibaldi",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:milano_porta_garibaldi"
     ],
     "operators": [
       "TGVMAX"
@@ -1963,180 +2568,194 @@
     "lon": 0
   },
   {
+    "id": "FR:millau",
     "name": "Millau",
     "city": "Millau",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:millau"
+      "FRMAU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.102344,
+    "lon": 3.07457
   },
   {
+    "id": "FR:miramas",
     "name": "Miramas",
     "city": "Miramas",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:miramas"
+      "FRMAS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.580704,
+    "lon": 5.000264
   },
   {
+    "id": "FR:modane",
     "name": "Modane",
     "city": "Modane",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:modane"
+      "FRMOD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.193365,
+    "lon": 6.658161
   },
   {
-    "name": "Montauban Ville Bourbon",
-    "city": "Montauban Ville Bourbon",
+    "id": "FR:montauban",
+    "name": "Montauban",
+    "city": "Montauban",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:montauban_ville_bourbon"
+      "FRMBN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.01667,
+    "lon": 1.35
   },
   {
+    "id": "FR:montbard",
     "name": "Montbard",
     "city": "Montbard",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:montbard"
+      "FRMBA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.618747,
+    "lon": 4.33616
   },
   {
+    "id": "FR:montdauphin-guillestre",
     "name": "Montdauphin Guillestre",
     "city": "Montdauphin Guillestre",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:montdauphin_guillestre"
+      "FRMOG"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.674628,
+    "lon": 6.615603
   },
   {
-    "name": "Montelimar Gare Sncf",
-    "city": "Montelimar Gare Sncf",
+    "id": "FR:montelimar",
+    "name": "Montelimar",
+    "city": "Montelimar",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:montelimar_gare_sncf"
+      "FRMTR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.566667,
+    "lon": 4.75
   },
   {
-    "name": "Montpellier Saint Roch",
-    "city": "Montpellier Saint Roch",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:montpellier_saint_roch"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
-    "name": "Montpellier Sud De France",
-    "city": "Montpellier Sud De France",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:montpellier_sud_de_france"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:montrejeau-gourdan-polignan",
     "name": "Montrejeau Gourdan Polignan",
     "city": "Montrejeau Gourdan Polignan",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:montrejeau_gourdan_polignan"
+      "FRMTJ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.078109,
+    "lon": 0.5735
   },
   {
+    "id": "FR:morlaix",
     "name": "Morlaix",
     "city": "Morlaix",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:morlaix"
+      "FRMXR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.57797,
+    "lon": -3.832514
   },
   {
-    "name": "Moulins Sur Allier",
-    "city": "Moulins Sur Allier",
+    "id": "FR:mouchard",
+    "name": "Mouchard",
+    "city": "Mouchard",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:moulins_sur_allier"
+      "FRMCD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.976911,
+    "lon": 5.799644
   },
   {
-    "name": "Moutiers Salins Brides Les Bains",
-    "city": "Moutiers Salins Brides Les Bains",
+    "id": "FR:moulins-sur-allier",
+    "name": "Moulins sur Allier",
+    "city": "Moulins sur Allier",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:moutiers_salins_brides_les_bains"
+      "FRMSA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.561346,
+    "lon": 3.338842
   },
   {
-    "name": "Mulhouse Ville",
-    "city": "Mulhouse Ville",
+    "id": "FR:moutiers-salins",
+    "name": "Moutiers Salins",
+    "city": "Moutiers Salins",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:mulhouse_ville"
+      "FRMOS"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 45.486344,
+    "lon": 6.531425
+  },
+  {
+    "id": "FR:mulhouse",
+    "name": "Mulhouse",
+    "city": "Mulhouse",
+    "country": "FR",
+    "stopIds": [
+      "FRMSE"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 47.742224,
+    "lon": 7.342396
+  },
+  {
+    "id": "FR:munchen-hbf",
+    "name": "Munchen Hbf",
+    "city": "Munchen Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:munchen_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -2145,149 +2764,147 @@
     "lon": 0
   },
   {
+    "id": "FR:nancy",
     "name": "Nancy",
     "city": "Nancy",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:nancy"
+      "FRNCY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.689861,
+    "lon": 6.174583
   },
   {
+    "id": "FR:nantes",
     "name": "Nantes",
     "city": "Nantes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:nantes"
+      "FRNTS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.216148,
+    "lon": -1.542356
   },
   {
+    "id": "FR:narbonne",
     "name": "Narbonne",
     "city": "Narbonne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:narbonne"
+      "FRNBN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.190387,
+    "lon": 3.00591
   },
   {
+    "id": "FR:naucelle",
+    "name": "Naucelle",
+    "city": "Naucelle",
+    "country": "FR",
+    "stopIds": [
+      "FRNCE"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.185479,
+    "lon": 2.363504
+  },
+  {
+    "id": "FR:neufchateau",
     "name": "Neufchateau",
     "city": "Neufchateau",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:neufchateau"
+      "FRNCH"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.358343,
+    "lon": 5.690402
   },
   {
+    "id": "FR:neussargues",
     "name": "Neussargues",
     "city": "Neussargues",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:neussargues"
+      "FRNEU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.125304,
+    "lon": 2.979187
   },
   {
+    "id": "FR:nevers",
     "name": "Nevers",
     "city": "Nevers",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:nevers"
+      "FRNVS"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.989562,
+    "lon": 3.158998
   },
   {
-    "name": "Nice Ville",
-    "city": "Nice Ville",
+    "id": "FR:nice",
+    "name": "Nice",
+    "city": "Nice",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:nice_ville"
+      "FRNIC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.696645,
+    "lon": 7.271941
   },
   {
-    "name": "Nimes Centre",
-    "city": "Nimes Centre",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:nimes_centre"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
-    "name": "Nimes Pont Du Gard",
-    "city": "Nimes Pont Du Gard",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:nimes_pont_du_gard"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:niort",
     "name": "Niort",
     "city": "Niort",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:niort"
+      "FRNRT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.319491,
+    "lon": -0.454639
   },
   {
-    "name": "Nurieux Gare",
-    "city": "Nurieux Gare",
+    "id": "FR:nurieux",
+    "name": "Nurieux",
+    "city": "Nurieux",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:nurieux_gare"
+      "FRNEX"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.18422,
+    "lon": 5.532749
   },
   {
+    "id": "FR:offenburg",
     "name": "Offenburg",
     "city": "Offenburg",
     "country": "FR",
@@ -2301,24 +2918,40 @@
     "lon": 0
   },
   {
+    "id": "FR:orange",
     "name": "Orange",
     "city": "Orange",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:orange"
+      "FROGE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.137304,
+    "lon": 4.819594
   },
   {
+    "id": "FR:orthez",
     "name": "Orthez",
     "city": "Orthez",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:orthez"
+      "FRORT"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.484242,
+    "lon": -0.76776
+  },
+  {
+    "id": "FR:oux-cesana-clav-sestriere",
+    "name": "Oux Cesana Clav Sestriere",
+    "city": "Oux Cesana Clav Sestriere",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:oux_cesana_clav_sestriere"
     ],
     "operators": [
       "TGVMAX"
@@ -2327,201 +2960,245 @@
     "lon": 0
   },
   {
+    "id": "FR:paris",
     "name": "Paris",
     "city": "Paris",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:paris_intramuros"
+      "FRPBY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.85341,
+    "lon": 2.3488
   },
   {
+    "id": "FR:pau",
     "name": "Pau",
     "city": "Pau",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:pau"
+      "FRPAU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.291762,
+    "lon": -0.369626
   },
   {
+    "id": "FR:perpignan",
     "name": "Perpignan",
     "city": "Perpignan",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:perpignan"
+      "FRPPN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.696292,
+    "lon": 2.879779
   },
   {
+    "id": "FR:pierrefitte-sur-aire",
+    "name": "Pierrefitte sur Aire",
+    "city": "Pierrefitte sur Aire",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:pierrefitte_sur_aire"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.898271,
+    "lon": 5.330324
+  },
+  {
+    "id": "FR:plouaret-tregor",
     "name": "Plouaret Tregor",
     "city": "Plouaret Tregor",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:plouaret_tregor"
+      "FRPLT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.606282,
+    "lon": -3.466823
   },
   {
+    "id": "FR:poitiers",
     "name": "Poitiers",
     "city": "Poitiers",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:poitiers"
+      "FRPST"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.582275,
+    "lon": 0.333241
   },
   {
+    "id": "FR:pont-de-rungis-aeroport-d-orly",
+    "name": "Pont de Rungis Aeroport D Orly",
+    "city": "Pont de Rungis Aeroport D Orly",
+    "country": "FR",
+    "stopIds": [
+      "FRPRU"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.748163,
+    "lon": 2.372792
+  },
+  {
+    "id": "FR:pornichet",
     "name": "Pornichet",
     "city": "Pornichet",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:pornichet"
+      "FRPNI"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.270535,
+    "lon": -2.344577
   },
   {
-    "name": "Port Vendres Ville",
-    "city": "Port Vendres Ville",
+    "id": "FR:port-vendres",
+    "name": "Port Vendres",
+    "city": "Port Vendres",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:port_vendres_ville"
+      "FRPOV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 42.513608,
+    "lon": 3.102576
   },
   {
+    "id": "FR:quimper",
     "name": "Quimper",
     "city": "Quimper",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:quimper"
+      "FRQPR"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.994455,
+    "lon": -4.092103
   },
   {
+    "id": "FR:quimperle",
     "name": "Quimperle",
     "city": "Quimperle",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:quimperle"
+      "FRQPL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.869375,
+    "lon": -3.552693
   },
   {
-    "name": "Rang Du Fliers Verton Berck",
-    "city": "Rang Du Fliers Verton Berck",
+    "id": "FR:rang-du-fliers-verton",
+    "name": "Rang du Fliers Verton",
+    "city": "Rang du Fliers Verton",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rang_du_fliers_verton_berck"
+      "FRRDF"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.41579,
+    "lon": 1.64805
   },
   {
+    "id": "FR:redon",
     "name": "Redon",
     "city": "Redon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:redon"
+      "FRRDN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.652004,
+    "lon": -2.08777
   },
   {
+    "id": "FR:reims",
     "name": "Reims",
     "city": "Reims",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:reims"
+      "FRRSN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.25,
+    "lon": 4.033333
   },
   {
+    "id": "FR:remiremont",
     "name": "Remiremont",
     "city": "Remiremont",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:remiremont"
+      "FRRMT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.016363,
+    "lon": 6.598855
   },
   {
+    "id": "FR:rennes",
     "name": "Rennes",
     "city": "Rennes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rennes"
+      "FRRES"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.083333,
+    "lon": -1.683333
   },
   {
+    "id": "FR:rethel",
     "name": "Rethel",
     "city": "Rethel",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rethel"
+      "FRRTL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.504393,
+    "lon": 4.369566
   },
   {
+    "id": "FR:ringsheim-europa-park",
     "name": "Ringsheim Europa Park",
     "city": "Ringsheim Europa Park",
     "country": "FR",
@@ -2535,115 +3212,124 @@
     "lon": 0
   },
   {
+    "id": "FR:riom-chatel-guyon",
     "name": "Riom Chatel Guyon",
     "city": "Riom Chatel Guyon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:riom_chatel_guyon"
+      "FRRIO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.889965,
+    "lon": 3.120498
   },
   {
+    "id": "FR:roanne",
     "name": "Roanne",
     "city": "Roanne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:roanne"
+      "FRROA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.039383,
+    "lon": 4.063207
   },
   {
+    "id": "FR:rocamadour-padirac",
     "name": "Rocamadour Padirac",
     "city": "Rocamadour Padirac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rocamadour_padirac"
+      "FRRAP"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.818356,
+    "lon": 1.657349
   },
   {
+    "id": "FR:rochefort",
     "name": "Rochefort",
     "city": "Rochefort",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rochefort"
+      "FRRCT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.947189,
+    "lon": -0.963556
   },
   {
+    "id": "FR:rodez",
     "name": "Rodez",
     "city": "Rodez",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rodez"
+      "FRRDZ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.362633,
+    "lon": 2.58056
   },
   {
+    "id": "FR:rosporden",
     "name": "Rosporden",
     "city": "Rosporden",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rosporden"
+      "FRRSP"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.960273,
+    "lon": -3.832763
   },
   {
-    "name": "Rouen Rive Droite",
-    "city": "Rouen Rive Droite",
+    "id": "FR:roubaix",
+    "name": "Roubaix",
+    "city": "Roubaix",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:rouen_rive_droite"
+      "FRRXB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 50.69561,
+    "lon": 3.16348
   },
   {
-    "name": "Sable Sur Sarthe",
-    "city": "Sable Sur Sarthe",
+    "id": "FR:rouen",
+    "name": "Rouen",
+    "city": "Rouen",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:sable_sur_sarthe"
+      "FRRRD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.443129,
+    "lon": 1.099319
   },
   {
-    "name": "Saincaize",
-    "city": "Saincaize",
+    "id": "FR:saarbruecken-sarrebruck",
+    "name": "Saarbruecken Sarrebruck",
+    "city": "Saarbruecken Sarrebruck",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saincaize"
+      "TGVMAX:saarbruecken_sarrebruck"
     ],
     "operators": [
       "TGVMAX"
@@ -2652,102 +3338,82 @@
     "lon": 0
   },
   {
-    "name": "Saint Avre La Chambre",
-    "city": "Saint Avre La Chambre",
+    "id": "FR:sable-sur-sarthe",
+    "name": "Sable sur Sarthe",
+    "city": "Sable sur Sarthe",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saint_avre_la_chambre"
+      "FRSAB"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.841593,
+    "lon": -0.341936
   },
   {
-    "name": "Saint Chely D'Apcher",
-    "city": "Saint Chely D'Apcher",
+    "id": "FR:saint-die-des-vosges",
+    "name": "Saint Die des Vosges",
+    "city": "Saint Die des Vosges",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saint_chely_d_apcher"
+      "FRSTD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.282225,
+    "lon": 6.948656
   },
   {
-    "name": "Saint Etienne Chateaucreux",
-    "city": "Saint Etienne Chateaucreux",
+    "id": "FR:saint-mihiel",
+    "name": "Saint Mihiel",
+    "city": "Saint Mihiel",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saint_etienne_chateaucreux"
+      "TGVMAX:saint_mihiel"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.892499,
+    "lon": 5.540762
   },
   {
-    "name": "Saint Georges De Luzencon",
-    "city": "Saint Georges De Luzencon",
+    "id": "FR:saint-mihiel-detention",
+    "name": "Saint Mihiel Detention",
+    "city": "Saint Mihiel Detention",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saint_georges_de_luzencon"
+      "TGVMAX:saint_mihiel_detention"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.892499,
+    "lon": 5.540762
   },
   {
-    "name": "Saint Germain Des Fosses",
-    "city": "Saint Germain Des Fosses",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:saint_germain_des_fosses"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
-    "name": "Saint Rome De Cernon",
-    "city": "Saint Rome De Cernon",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:saint_rome_de_cernon"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:saintes",
     "name": "Saintes",
     "city": "Saintes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saintes"
+      "FRSKW"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.74874,
+    "lon": -0.6179
   },
   {
-    "name": "Sallanches Combloux Megeve",
-    "city": "Sallanches Combloux Megeve",
+    "id": "FR:sampigny",
+    "name": "Sampigny",
+    "city": "Sampigny",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:sallanches_combloux_megeve"
+      "TGVMAX:sampigny_centre"
     ],
     "operators": [
       "TGVMAX"
@@ -2756,102 +3422,124 @@
     "lon": 0
   },
   {
+    "id": "FR:sarrebourg",
     "name": "Sarrebourg",
     "city": "Sarrebourg",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:sarrebourg"
+      "FRSBG"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.73808,
+    "lon": 7.05285
   },
   {
+    "id": "FR:saumur",
     "name": "Saumur",
     "city": "Saumur",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saumur"
+      "FRSUD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.269,
+    "lon": -0.07136
   },
   {
+    "id": "FR:saverne",
     "name": "Saverne",
     "city": "Saverne",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:saverne"
+      "FRSNE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.744461,
+    "lon": 7.36208
   },
   {
+    "id": "FR:sedan",
     "name": "Sedan",
     "city": "Sedan",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:sedan"
+      "FRSED"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.7,
+    "lon": 4.95
   },
   {
+    "id": "FR:selestat",
     "name": "Selestat",
     "city": "Selestat",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:selestat"
+      "FRSTT"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.260117,
+    "lon": 7.443278
   },
   {
+    "id": "FR:sete",
     "name": "Sete",
     "city": "Sete",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:sete"
+      "FRSTE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.412485,
+    "lon": 3.69656
   },
   {
-    "name": "Severac Le Chateau",
-    "city": "Severac Le Chateau",
+    "id": "FR:severac-le-chateau",
+    "name": "Severac le Chateau",
+    "city": "Severac le Chateau",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:severac_le_chateau"
+      "FRSVC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.324652,
+    "lon": 3.056945
   },
   {
+    "id": "FR:souillac",
     "name": "Souillac",
     "city": "Souillac",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:souillac"
+      "FRSOU"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.902127,
+    "lon": 1.466605
+  },
+  {
+    "id": "FR:souilly",
+    "name": "Souilly",
+    "city": "Souilly",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:souilly"
     ],
     "operators": [
       "TGVMAX"
@@ -2860,219 +3548,292 @@
     "lon": 0
   },
   {
+    "id": "FR:st-brieuc",
     "name": "St Brieuc",
     "city": "St Brieuc",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_brieuc"
+      "FRSBC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.50758,
+    "lon": -2.765
   },
   {
+    "id": "FR:st-chely-d-apcher",
+    "name": "St Chely D Apcher",
+    "city": "St Chely D Apcher",
+    "country": "FR",
+    "stopIds": [
+      "FRSYH"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.801738,
+    "lon": 3.27069
+  },
+  {
+    "id": "FR:st-christophe",
     "name": "St Christophe",
     "city": "St Christophe",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_christophe"
+      "FRSIH"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.464619,
+    "lon": 2.407759
   },
   {
+    "id": "FR:st-denis-pres-martel",
     "name": "St Denis Pres Martel",
     "city": "St Denis Pres Martel",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_denis_pres_martel"
+      "FRSDM"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.945932,
+    "lon": 1.666338
   },
   {
-    "name": "St Die",
-    "city": "St Die",
+    "id": "FR:st-etienne-chateaucreux",
+    "name": "St Etienne Chateaucreux",
+    "city": "St Etienne Chateaucreux",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_die"
+      "FRSEN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.443366,
+    "lon": 4.399722
   },
   {
+    "id": "FR:st-flour-chaudes-aigues",
     "name": "St Flour Chaudes Aigues",
     "city": "St Flour Chaudes Aigues",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_flour_chaudes_aigues"
+      "FRSFC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.035012,
+    "lon": 3.106286
   },
   {
+    "id": "FR:st-gaudens",
     "name": "St Gaudens",
     "city": "St Gaudens",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_gaudens"
+      "FRSGD"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.105034,
+    "lon": 0.729104
   },
   {
-    "name": "St Gervais Les Bains Le Fayet",
-    "city": "St Gervais Les Bains Le Fayet",
+    "id": "FR:st-georges-de-luzencon",
+    "name": "St Georges de Luzencon",
+    "city": "St Georges de Luzencon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_gervais_les_bains_le_fayet"
+      "FRSDU"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.066553,
+    "lon": 2.983784
   },
   {
-    "name": "St Jean De Luz Ciboure",
-    "city": "St Jean De Luz Ciboure",
+    "id": "FR:st-germain-des-fosses",
+    "name": "St Germain des Fosses",
+    "city": "St Germain des Fosses",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_jean_de_luz_ciboure"
+      "FRSGF"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.209185,
+    "lon": 3.430614
   },
   {
-    "name": "St Jean De Maurienne Arvan",
-    "city": "St Jean De Maurienne Arvan",
+    "id": "FR:st-jean-de-luz-ciboure",
+    "name": "St Jean de Luz Ciboure",
+    "city": "St Jean de Luz Ciboure",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_jean_de_maurienne_arvan"
+      "FRSJZ"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.385838,
+    "lon": -1.66122
   },
   {
+    "id": "FR:st-jean-de-maurienne-arvan",
+    "name": "St Jean de Maurienne Arvan",
+    "city": "St Jean de Maurienne Arvan",
+    "country": "FR",
+    "stopIds": [
+      "FRSJM"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 45.277542,
+    "lon": 6.354716
+  },
+  {
+    "id": "FR:st-maixent",
     "name": "St Maixent",
     "city": "St Maixent",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_maixent_deux_sevres"
+      "FRSMX"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.406607,
+    "lon": -0.201073
   },
   {
+    "id": "FR:st-malo",
     "name": "St Malo",
     "city": "St Malo",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_malo"
+      "FRSMP"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.646859,
+    "lon": -2.004158
   },
   {
-    "name": "St Michel Valloire",
-    "city": "St Michel Valloire",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:st_michel_valloire"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:st-nazaire",
     "name": "St Nazaire",
     "city": "St Nazaire",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_nazaire"
+      "FRSNA"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.286412,
+    "lon": -2.211096
   },
   {
-    "name": "St Pierre Des Corps",
-    "city": "St Pierre Des Corps",
+    "id": "FR:st-pierre-des-corps",
+    "name": "St Pierre des Corps",
+    "city": "St Pierre des Corps",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_pierre_des_corps"
+      "FRSPC"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.386099,
+    "lon": 0.72355
   },
   {
+    "id": "FR:st-quentin",
+    "name": "St Quentin",
+    "city": "St Quentin",
+    "country": "FR",
+    "stopIds": [
+      "FRSQT"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 49.840048,
+    "lon": 3.297009
+  },
+  {
+    "id": "FR:st-raphael-valescure",
     "name": "St Raphael Valescure",
     "city": "St Raphael Valescure",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_raphael_valescure"
+      "FRSRV"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.42356,
+    "lon": 6.769083
   },
   {
-    "name": "St Vincent De Tyrosse",
-    "city": "St Vincent De Tyrosse",
+    "id": "FR:st-rome-de-cernon",
+    "name": "St Rome de Cernon",
+    "city": "St Rome de Cernon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:st_vincent_de_tyrosse"
+      "FRSDO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.013981,
+    "lon": 2.967374
   },
   {
+    "id": "FR:st-vincent-de-tyrosse",
+    "name": "St Vincent de Tyrosse",
+    "city": "St Vincent de Tyrosse",
+    "country": "FR",
+    "stopIds": [
+      "FRSVT"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.657736,
+    "lon": -1.306493
+  },
+  {
+    "id": "FR:strasbourg",
     "name": "Strasbourg",
     "city": "Strasbourg",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:strasbourg"
+      "FRSTG"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.584967,
+    "lon": 7.734584
+  },
+  {
+    "id": "FR:stuttgart-hbf",
+    "name": "Stuttgart Hbf",
+    "city": "Stuttgart Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:stuttgart_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -3081,24 +3842,40 @@
     "lon": 0
   },
   {
+    "id": "FR:surgeres",
     "name": "Surgeres",
     "city": "Surgeres",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:surgeres"
+      "FRSGE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.113238,
+    "lon": -0.762284
   },
   {
+    "id": "FR:tarbes",
     "name": "Tarbes",
     "city": "Tarbes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:tarbes"
+      "FRTBS"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 43.239955,
+    "lon": 0.069415
+  },
+  {
+    "id": "FR:tbd",
+    "name": "Tbd",
+    "city": "Tbd",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:tbd"
     ],
     "operators": [
       "TGVMAX"
@@ -3107,8 +3884,9 @@
     "lon": 0
   },
   {
-    "name": "Tgv Haute Picardie",
-    "city": "Tgv Haute Picardie",
+    "id": "FR:tgv",
+    "name": "Tgv",
+    "city": "Tgv",
     "country": "FR",
     "stopIds": [
       "TGVMAX:tgv_haute_picardie"
@@ -3120,24 +3898,40 @@
     "lon": 0
   },
   {
+    "id": "FR:thionville",
     "name": "Thionville",
     "city": "Thionville",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:thionville"
+      "FRTHL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.353931,
+    "lon": 6.169543
   },
   {
-    "name": "Thonon Les Bains",
-    "city": "Thonon Les Bains",
+    "id": "FR:thonon-les-bains",
+    "name": "Thonon les Bains",
+    "city": "Thonon les Bains",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:thonon_les_bains"
+      "FRTHO"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 46.369004,
+    "lon": 6.481669
+  },
+  {
+    "id": "FR:torino-porta-nuova",
+    "name": "Torino Porta Nuova",
+    "city": "Torino Porta Nuova",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:torino_porta_nuova"
     ],
     "operators": [
       "TGVMAX"
@@ -3146,63 +3940,110 @@
     "lon": 0
   },
   {
+    "id": "FR:torino-porta-susa",
+    "name": "Torino Porta Susa",
+    "city": "Torino Porta Susa",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:torino_porta_susa"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 0,
+    "lon": 0
+  },
+  {
+    "id": "FR:toul",
     "name": "Toul",
     "city": "Toul",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:toul"
+      "FRTOL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.679018,
+    "lon": 5.880615
   },
   {
+    "id": "FR:toulon",
     "name": "Toulon",
     "city": "Toulon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:toulon"
+      "FRTLN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.12837,
+    "lon": 5.929293
   },
   {
-    "name": "Toulouse Matabiau",
-    "city": "Toulouse Matabiau",
+    "id": "FR:toulouse",
+    "name": "Toulouse",
+    "city": "Toulouse",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:toulouse_matabiau"
+      "FRTSE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.604464,
+    "lon": 1.444005
   },
   {
+    "id": "FR:tourcoing",
+    "name": "Tourcoing",
+    "city": "Tourcoing",
+    "country": "FR",
+    "stopIds": [
+      "FRTRG"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 50.71683,
+    "lon": 3.16804
+  },
+  {
+    "id": "FR:tournemire-roquefort",
     "name": "Tournemire Roquefort",
     "city": "Tournemire Roquefort",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:tournemire_roquefort"
+      "FRTEO"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 43.9698,
+    "lon": 3.016626
   },
   {
+    "id": "FR:tours",
     "name": "Tours",
     "city": "Tours",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:tours"
+      "FRTRS"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 47.389781,
+    "lon": 0.693703
+  },
+  {
+    "id": "FR:ulm-hbf",
+    "name": "Ulm Hbf",
+    "city": "Ulm Hbf",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:ulm_hbf"
     ],
     "operators": [
       "TGVMAX"
@@ -3211,50 +4052,54 @@
     "lon": 0
   },
   {
+    "id": "FR:uzerche",
     "name": "Uzerche",
     "city": "Uzerche",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:uzerche"
+      "FRURE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 45.440709,
+    "lon": 1.570274
   },
   {
-    "name": "Valence Tgv Auvergne Rhone Alpes",
-    "city": "Valence Tgv Auvergne Rhone Alpes",
+    "id": "FR:valence",
+    "name": "Valence",
+    "city": "Valence",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:valence_tgv_auvergne_rhone_alpes"
+      "FRVAL"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.93324,
+    "lon": 4.89236
   },
   {
-    "name": "Valence Ville",
-    "city": "Valence Ville",
-    "country": "FR",
-    "stopIds": [
-      "TGVMAX:valence_ville"
-    ],
-    "operators": [
-      "TGVMAX"
-    ],
-    "lat": 0,
-    "lon": 0
-  },
-  {
+    "id": "FR:valenciennes",
     "name": "Valenciennes",
     "city": "Valenciennes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:valenciennes"
+      "FRVSN"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 50.363259,
+    "lon": 3.517115
+  },
+  {
+    "id": "FR:vallorbe",
+    "name": "Vallorbe",
+    "city": "Vallorbe",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:vallorbe"
     ],
     "operators": [
       "TGVMAX"
@@ -3263,115 +4108,152 @@
     "lon": 0
   },
   {
+    "id": "FR:vannes",
     "name": "Vannes",
     "city": "Vannes",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:vannes"
+      "FRVAN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.665169,
+    "lon": -2.75245
   },
   {
-    "name": "Vendome Villiers Sur Loir",
-    "city": "Vendome Villiers Sur Loir",
+    "id": "FR:vendome",
+    "name": "Vendome",
+    "city": "Vendome",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:vendome_villiers_sur_loir"
+      "FRVDM"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.80215,
+    "lon": 1.067873
   },
   {
-    "name": "Versailles Chantiers",
-    "city": "Versailles Chantiers",
+    "id": "FR:verdun",
+    "name": "Verdun",
+    "city": "Verdun",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:versailles_chantiers"
+      "FRVDN"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 49.165406,
+    "lon": 5.379701
   },
   {
+    "id": "FR:versailles",
+    "name": "Versailles",
+    "city": "Versailles",
+    "country": "FR",
+    "stopIds": [
+      "FRVCR"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 48.7526,
+    "lon": 2.5735
+  },
+  {
+    "id": "FR:veynes-devoluy",
     "name": "Veynes Devoluy",
     "city": "Veynes Devoluy",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:veynes_devoluy"
+      "FRVDY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 44.532005,
+    "lon": 5.815764
   },
   {
+    "id": "FR:vichy",
     "name": "Vichy",
     "city": "Vichy",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:vichy"
+      "FRVHY"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 46.126979,
+    "lon": 3.430448
   },
   {
+    "id": "FR:vierzon",
     "name": "Vierzon",
     "city": "Vierzon",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:vierzon"
+      "FRVER"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 47.226497,
+    "lon": 2.059822
   },
   {
+    "id": "FR:vitre",
     "name": "Vitre",
     "city": "Vitre",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:vitre"
+      "FRVTE"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.122671,
+    "lon": -1.211754
   },
   {
-    "name": "Vitry Le Francois",
-    "city": "Vitry Le Francois",
+    "id": "FR:vitry-le-francois",
+    "name": "Vitry le Francois",
+    "city": "Vitry le Francois",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:vitry_le_francois"
+      "FRVYF"
     ],
     "operators": [
       "TGVMAX"
     ],
-    "lat": 0,
-    "lon": 0
+    "lat": 48.718142,
+    "lon": 4.587581
   },
   {
+    "id": "FR:viviez-decazeville",
     "name": "Viviez Decazeville",
     "city": "Viviez Decazeville",
     "country": "FR",
     "stopIds": [
-      "TGVMAX:viviez_decazeville"
+      "FRVZI"
+    ],
+    "operators": [
+      "TGVMAX"
+    ],
+    "lat": 44.555568,
+    "lon": 2.218258
+  },
+  {
+    "id": "FR:zurich-hb",
+    "name": "Zurich Hb",
+    "city": "Zurich Hb",
+    "country": "FR",
+    "stopIds": [
+      "TGVMAX:zurich_hb"
     ],
     "operators": [
       "TGVMAX"
