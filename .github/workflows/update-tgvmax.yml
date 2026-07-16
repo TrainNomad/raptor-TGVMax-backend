@@ -1,8 +1,5 @@
 name: Update TGVmax Data
 
-permissions:
-  contents: write
-
 on:
   schedule:
     - cron: '30 7 * * *'
@@ -11,26 +8,26 @@ on:
 jobs:
   update-tgvmax:
     runs-on: ubuntu-latest
-    timeout-minutes: 10 # Réduit à 10m max (sécurité pour éviter que ça tourne dans le vide)
+    timeout-minutes: 15
 
     steps:
-      # ── 1. Récupération ultra-rapide (Uniquement le dernier commit) ──────────
+      # ── 1. Récupération ultra-rapide du code ─────────────────────────────────
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1 # ⚡ ÉCONOMIE : On ne télécharge pas tout l'historique Git
+          fetch-depth: 1 # ⚡ Économie de bande passante et historique propre
 
       # ── 2. Configuration Node.js ─────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm' # ⚡ ÉCONOMIE : Met en cache vos modules Node pour aller 2x plus vite
+          cache: 'npm' # Évite de retélécharger tous les modules Node à chaque fois
 
       - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            npm ci # ⚡ Plus rapide et plus propre que 'npm install' dans les Actions
+            npm ci # Utilise la version lock pour aller beaucoup plus vite
           fi
 
       # ── 3. Téléchargement de stations.csv (pour les coordonnées GPS) ─────────
@@ -45,48 +42,9 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
-      # ── 5. Vérification des fichiers critiques ────────────────────────────────
-      - name: Verify outputs
-        run: |
-          echo "=== Contenu de engine_data/ ==="
-          ls -lh engine_data/
-          for f in trips.json stops.json calendar_index.json meta.json; do
-            if [ ! -f "engine_data/$f" ]; then
-              echo "❌ Fichier critique manquant : engine_data/$f"
-              exit 1
-            fi
-          done
-          if [ ! -f "stations.json" ]; then
-            echo "❌ stations.json manquant à la racine"
-            exit 1
-          fi
-          echo "✅ Tous les fichiers nécessaires sont présents"
-
-      # ── 6. Configuration Git ─────────────────────────────────────────────────
-      - name: Configure git
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      # ── 7. Push optimisé sur la branche deploy ───────────────────────────────
-      - name: Push to deploy branch
-        run: |
-          git fetch --depth=1 origin deploy 2>/dev/null || true
-          git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
-
-          # Fusionner main proprement
-          git merge origin/main --no-edit --strategy-option=ours
-
-          # Fichiers engine_data/ (trips, stops, routes, calendar, meta)
-          git add -f engine_data/*.json
-          git add -f stations.json
-          git add stations.csv
-
-          if git diff --staged --quiet; then
-            echo "ℹ️ Aucun changement détecté"
-          else
-            git commit -m "chore: update tgvmax data $(date -u +'%Y-%m-%d %H:%M')"
-            # ⚡ CORRECTION : On ajoute --force pour écraser proprement l'ancienne version
-            git push origin deploy --force
-            echo "✅ Données poussées avec succès"
-          fi
+      # ── 5. Envoi direct sur Supabase Storage (Aucun push Git volumineux !) ──
+      - name: Upload data to Supabase Storage
+        run: node upload.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

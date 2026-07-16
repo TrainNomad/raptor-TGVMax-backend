@@ -42,52 +42,76 @@ let engineError    = null;
 let engineLoadedAt = null;
 let engineLoadMs   = null;
 
-function loadJSON(filename) {
-  const p = path.join(DATA_DIR, filename);
-  if (!fs.existsSync(p)) throw new Error('Fichier manquant : ' + p);
-  return JSON.parse(fs.readFileSync(p, 'utf8'));
-}
+// function loadJSON(filename) {
+//   const p = path.join(DATA_DIR, filename);
+//   if (!fs.existsSync(p)) throw new Error('Fichier manquant : ' + p);
+//   return JSON.parse(fs.readFileSync(p, 'utf8'));
+// }
 
 // ─── Chargement ───────────────────────────────────────────────────────────────
 
-function initEngine() {
-  console.log('\n🚄 Chargement moteur TGVmax...');
+const PORT     = process.env.PORT     || 3000;
+
+// ─── URL de votre Bucket Supabase public ──────────────────────────────────────
+const SUPABASE_BUCKET_URL = "https://wqgpnxmpezzunhphcrg.supabase.co/storage/v1/object/public/tgvmax-data";
+
+// ─── Chargement asynchrone depuis Supabase ────────────────────────────────────
+
+async function initEngine() {
+  console.log('\n🚄 Initialisation : Téléchargement des données TGVmax depuis Supabase...');
   const t = Date.now();
 
-  trips         = loadJSON('trips.json');
-  stops         = loadJSON('stops.json');
-  routesByStop  = loadJSON('routes_by_stop.json');
-  calendarIndex = loadJSON('calendar_index.json');
-  meta          = loadJSON('meta.json');
+  try {
+    // Téléchargement de l'ensemble des fichiers requis en parallèle (gain de temps optimal)
+    const [tripsRes, stopsRes, routesRes, calendarRes, metaRes, stationsRes] = await Promise.all([
+      fetch(`${SUPABASE_BUCKET_URL}/trips.json`),
+      fetch(`${SUPABASE_BUCKET_URL}/stops.json`),
+      fetch(`${SUPABASE_BUCKET_URL}/routes_by_stop.json`),
+      fetch(`${SUPABASE_BUCKET_URL}/calendar_index.json`),
+      fetch(`${SUPABASE_BUCKET_URL}/meta.json`),
+      fetch(`${SUPABASE_BUCKET_URL}/stations.json`)
+    ]);
 
-  // Construire un index date → [trip_ids] pour TOUS les trips (dispo ou non)
-  allCalendarIndex = {};
-  for (const [tripId, trip] of Object.entries(trips)) {
-    if (!trip.date) continue;
-    if (!allCalendarIndex[trip.date]) allCalendarIndex[trip.date] = [];
-    allCalendarIndex[trip.date].push(tripId);
+    // Extraction et parsing JSON en RAM
+    trips         = await tripsRes.json();
+    stops         = await stopsRes.json();
+    routesByStop  = await routesRes.json();
+    calendarIndex = await calendarRes.json();
+    meta          = await metaRes.json();
+    const rawStations = await stationsRes.json();
+
+    // Construire un index date → [trip_ids] pour TOUS les trips (dispo ou non)
+    allCalendarIndex = {};
+    for (const [tripId, trip] of Object.entries(trips)) {
+      if (!trip.date) continue;
+      if (!allCalendarIndex[trip.date]) allCalendarIndex[trip.date] = [];
+      allCalendarIndex[trip.date].push(tripId);
+    }
+    console.log('  Index all-trips : ' + Object.keys(allCalendarIndex).length + ' dates');
+
+    // Construire l'autocomplétion en lui injectant directement les données chargées
+    buildStopsIndex(rawStations);
+
+    const totalTrips = Object.keys(trips).length;
+    engineLoadMs   = Date.now() - t;
+    engineLoadedAt = new Date().toISOString();
+    engineReady    = true;
+    console.log('✅ Prêt en ' + engineLoadMs + 'ms — ' + totalTrips.toLocaleString() + ' trajets TGVmax chargés en RAM\n');
+  } catch (err) {
+    engineError = err.message;
+    console.error('❌ Échec critique du chargement du moteur depuis Supabase :', err);
+    process.exit(1); // On arrête l'application si l'API n'a pas pu charger ses données vitales
   }
-  console.log('  Index all-trips : ' + Object.keys(allCalendarIndex).length + ' dates');
-
-  buildStopsIndex();
-
-  const totalTrips = Object.keys(trips).length;
-  engineLoadMs   = Date.now() - t;
-  engineLoadedAt = new Date().toISOString();
-  engineReady    = true;
-  console.log('✅ Prêt en ' + engineLoadMs + 'ms — ' + totalTrips.toLocaleString() + ' trajets TGVmax chargés\n');
 }
 
 // ─── Autocomplétion ───────────────────────────────────────────────────────────
 
-function buildStopsIndex() {
+function buildStopsIndex(rawStations) {
   stopsIndex = [];
   cityIndex  = new Map();
 
-  const stFile = path.join(__dirname, 'stations.json');
-  if (fs.existsSync(stFile)) {
-    const raw = JSON.parse(fs.readFileSync(stFile, 'utf8'));
-    for (const s of raw) {
+  if (rawStations && Array.isArray(rawStations)) {
+    for (const s of rawStations) {
       const city    = s.city    || s.name;
       const country = s.country || 'FR';
       stopsIndex.push({ name:s.name, city, country, stopIds:s.stopIds||[], operators:s.operators||[], lat:s.lat||0, lon:s.lon||0 });
@@ -901,12 +925,20 @@ const server = http.createServer(async (req, res) => {
 
 // ─── Démarrage ────────────────────────────────────────────────────────────────
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log('🌐 http://localhost:' + PORT + '  (moteur en cours de chargement…)');
-  try {
-    initEngine();
-  } catch (err) {
-    engineError = err.message;
-    console.error('❌ Échec chargement moteur :', err);
-  }
+  // On charge les données Supabase en RAM au lancement
+  await initEngine();
 });
+
+// // ─── Démarrage ────────────────────────────────────────────────────────────────
+
+// server.listen(PORT, () => {
+//   console.log('🌐 http://localhost:' + PORT + '  (moteur en cours de chargement…)');
+//   try {
+//     initEngine();
+//   } catch (err) {
+//     engineError = err.message;
+//     console.error('❌ Échec chargement moteur :', err);
+//   }
+// });

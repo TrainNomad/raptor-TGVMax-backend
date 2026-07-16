@@ -1,0 +1,57 @@
+const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
+
+// Récupération des clés d'accès via les variables d'environnement
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error("❌ Erreur : Les variables SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont requises.");
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+const BUCKET_NAME = 'tgvmax-data'; // Assurez-vous que le nom correspond à votre bucket Supabase
+
+async function uploadFile(localPath, supabasePath) {
+  if (!fs.existsSync(localPath)) {
+    console.warn(`⚠️ Fichier local introuvable, étape sautée : ${localPath}`);
+    return;
+  }
+
+  const fileBuffer = fs.readFileSync(localPath);
+  
+  console.log(`⏳ Envoi de ${localPath} vers Supabase...`);
+  const { data, error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .upload(supabasePath, fileBuffer, {
+      contentType: 'application/json',
+      upsert: true // Écrase le fichier s'il existe déjà
+    });
+
+  if (error) {
+    console.error(`❌ Erreur d'upload pour ${localPath}:`, error.message);
+    process.exit(1);
+  } else {
+    console.log(`✅ ${localPath} mis à jour avec succès sur Supabase !`);
+  }
+}
+
+async function main() {
+  const filesToUpload = [
+    { local: 'engine_data/trips.json', remote: 'trips.json' },
+    { local: 'engine_data/stops.json', remote: 'stops.json' },
+    { local: 'engine_data/calendar_index.json', remote: 'calendar_index.json' },
+    { local: 'engine_data/meta.json', remote: 'meta.json' },
+    { local: 'engine_data/routes_by_stop.json', remote: 'routes_by_stop.json' },
+    { local: 'stations.json', remote: 'stations.json' }
+  ];
+
+  for (const file of filesToUpload) {
+    await uploadFile(file.local, file.remote);
+  }
+  console.log("🎉 Toutes les données ont été envoyées sur Supabase !");
+}
+
+main();
