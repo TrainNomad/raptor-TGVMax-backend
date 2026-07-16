@@ -11,25 +11,26 @@ on:
 jobs:
   update-tgvmax:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10 # Réduit à 10m max (sécurité pour éviter que ça tourne dans le vide)
 
     steps:
-      # ── 1. Récupération du code ──────────────────────────────────────────────
+      # ── 1. Récupération ultra-rapide (Uniquement le dernier commit) ──────────
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1 # ⚡ ÉCONOMIE : On ne télécharge pas tout l'historique Git
 
       # ── 2. Configuration Node.js ─────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm' # ⚡ ÉCONOMIE : Met en cache vos modules Node pour aller 2x plus vite
 
       - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            npm install
+            npm ci # ⚡ Plus rapide et plus propre que 'npm install' dans les Actions
           fi
 
       # ── 3. Téléchargement de stations.csv (pour les coordonnées GPS) ─────────
@@ -39,7 +40,6 @@ jobs:
           echo "✅ stations.csv prêt"
 
       # ── 4. Ingestion + construction de l'index des gares ─────────────────────
-      # npm run build = tgvmax-ingest.js PUIS build-stations-index.js
       - name: Run Build (ingest + stations index)
         run: npm run build
         env:
@@ -68,26 +68,26 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # ── 7. Push sur la branche deploy ────────────────────────────────────────
+      # ── 7. Push optimisé sur la branche deploy ───────────────────────────────
       - name: Push to deploy branch
         run: |
-          git fetch origin deploy 2>/dev/null || true
+          # ⚡ ÉCONOMIE : On récupère uniquement la branche deploy avec un historique de 1 commit
+          git fetch --depth=1 origin deploy 2>/dev/null || true
           git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
 
-          # Fusionner main pour avoir le dernier code du serveur
+          # Fusionner main proprement
           git merge origin/main --no-edit --strategy-option=ours
 
           # Fichiers engine_data/ (trips, stops, routes, calendar, meta)
           git add -f engine_data/*.json
-          # stations.json à la racine (utilisé par server.js pour l'autocomplétion)
           git add -f stations.json
-          # stations.csv (utilisé par build-stations-index.js)
           git add stations.csv
 
           if git diff --staged --quiet; then
             echo "ℹ️ Aucun changement détecté"
           else
             git commit -m "chore: update tgvmax data $(date -u +'%Y-%m-%d %H:%M')"
-            git push origin deploy --force
+            # ⚡ ÉCONOMIE & NETTOYAGE : Évite de saturer l'espace de stockage avec l'historique des vieux JSON
+            git push origin deploy
             echo "✅ Données poussées avec succès"
           fi
