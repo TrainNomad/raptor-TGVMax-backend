@@ -71,7 +71,6 @@ jobs:
       # ── 7. Push optimisé sur la branche deploy ───────────────────────────────
       - name: Push to deploy branch
         run: |
-          # ⚡ ÉCONOMIE : On récupère uniquement la branche deploy avec un historique de 1 commit
           git fetch --depth=1 origin deploy 2>/dev/null || true
           git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
 
@@ -87,7 +86,7 @@ jobs:
             echo "ℹ️ Aucun changement détecté"
           else
             git commit -m "chore: update tgvmax data $(date -u +'%Y-%m-%d %H:%M')"
-            # ⚡ ÉCONOMIE & NETTOYAGE : Évite de saturer l'espace de stockage avec l'historique des vieux JSON
-            git push origin deploy
+            # ⚡ CORRECTION : On ajoute --force pour écraser proprement l'ancienne version
+            git push origin deploy --force
             echo "✅ Données poussées avec succès"
           fi
