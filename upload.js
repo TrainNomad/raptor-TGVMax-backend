@@ -1,18 +1,25 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
-const path = require('path');
 
-// Récupération des clés d'accès via les variables d'environnement
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("❌ Erreur : Les variables SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont requises.");
+  console.error("❌ Erreur : SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY doivent être définies.");
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
-const BUCKET_NAME = 'tgvmax-data'; // Assurez-vous que le nom correspond à votre bucket Supabase
+// 💡 CORRECTION : Désactivation explicite des websockets realtime pour éviter les crashs Node
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false
+  },
+  realtime: {
+    create實時Client: () => null // Désactive l'initialisation realtime
+  }
+});
+
+const BUCKET_NAME = 'tgvmax-data';
 
 async function uploadFile(localPath, supabasePath) {
   if (!fs.existsSync(localPath)) {
