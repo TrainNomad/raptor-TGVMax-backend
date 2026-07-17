@@ -1,7 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 
-const supabaseUrl = process.env.SUPABASE_URL;
+// 1. Récupération et nettoyage de l'URL (suppression d'un éventuel slash à la fin)
+let supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
@@ -9,44 +10,53 @@ if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
 }
 
-// 💡 CORRECTION : Désactivation explicite des websockets realtime pour éviter les crashs Node
+if (supabaseUrl.endsWith('/')) {
+  supabaseUrl = supabaseUrl.slice(0, -1);
+}
+
+// 2. Initialisation propre du client Supabase
 const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: false
-  },
-  realtime: {
-    create實時Client: () => null // Désactive l'initialisation realtime
-  }
+  auth: { persistSession: false }
 });
 
 const BUCKET_NAME = 'tgvmax-data';
 
-async function uploadFile(localPath, supabasePath) {
+async function uploadFile(localPath, remotePath) {
   if (!fs.existsSync(localPath)) {
-    console.warn(`⚠️ Fichier local introuvable, étape sautée : ${localPath}`);
+    console.warn(`⚠️ Fichier introuvable, étape sautée : ${localPath}`);
     return;
   }
 
-  const fileBuffer = fs.readFileSync(localPath);
-  
-  console.log(`⏳ Envoi de ${localPath} vers Supabase...`);
-  const { data, error } = await supabase.storage
-    .from(BUCKET_NAME)
-    .upload(supabasePath, fileBuffer, {
-      contentType: 'application/json',
-      upsert: true // Écrase le fichier s'il existe déjà
-    });
+  try {
+    const fileBuffer = fs.readFileSync(localPath);
+    
+    // 💡 Astuce de compatibilité Node 22 : On convertit le Buffer en Blob standardisé
+    // pour éviter les crashs de "fetch failed" sur les gros fichiers comme trips.json
+    const fileBlob = new Blob([fileBuffer], { type: 'application/json' });
+    
+    console.log(`⏳ Envoi de ${localPath} (${(fileBuffer.length / 1024 / 1024).toFixed(2)} Mo) vers Supabase...`);
 
-  if (error) {
-    console.error(`❌ Erreur d'upload pour ${localPath}:`, error.message);
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(remotePath, fileBlob, {
+        contentType: 'application/json',
+        upsert: true // Écrase le fichier s'il existe déjà
+      });
+
+    if (error) {
+      console.error(`❌ Erreur retournée par Supabase pour ${localPath} :`, error.message);
+      process.exit(1);
+    } else {
+      console.log(`✅ ${localPath} envoyé avec succès sous le nom "${remotePath}" !`);
+    }
+  } catch (err) {
+    console.error(`❌ Crash système lors de l'envoi de ${localPath} :`, err);
     process.exit(1);
-  } else {
-    console.log(`✅ ${localPath} mis à jour avec succès sur Supabase !`);
   }
 }
 
 async function main() {
-  const filesToUpload = [
+  const files = [
     { local: 'engine_data/trips.json', remote: 'trips.json' },
     { local: 'engine_data/stops.json', remote: 'stops.json' },
     { local: 'engine_data/calendar_index.json', remote: 'calendar_index.json' },
@@ -55,10 +65,10 @@ async function main() {
     { local: 'stations.json', remote: 'stations.json' }
   ];
 
-  for (const file of filesToUpload) {
+  for (const file of files) {
     await uploadFile(file.local, file.remote);
   }
-  console.log("🎉 Toutes les données ont été envoyées sur Supabase !");
+  console.log("🎉 Tous les fichiers de données ont été mis à jour sur Supabase !");
 }
 
 main();
