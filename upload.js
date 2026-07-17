@@ -20,6 +20,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 });
 
 const BUCKET_NAME = 'tgvmax-data';
+const CHUNK_SIZE = 45 * 1024 * 1024; // 45 Mo par chunk (< limite 50Mo de Supabase)
 
 async function uploadFile(localPath, remotePath) {
   if (!fs.existsSync(localPath)) {
@@ -28,29 +29,80 @@ async function uploadFile(localPath, remotePath) {
   }
 
   try {
-    const fileBuffer = fs.readFileSync(localPath);
+    const fileSize = fs.statSync(localPath).size;
+    const fileSizeMb = (fileSize / 1024 / 1024).toFixed(2);
     
-    // 💡 Astuce de compatibilité Node 22 : On convertit le Buffer en Blob standardisé
-    // pour éviter les crashs de "fetch failed" sur les gros fichiers comme trips.json
-    const fileBlob = new Blob([fileBuffer], { type: 'application/json' });
-    
-    console.log(`⏳ Envoi de ${localPath} (${(fileBuffer.length / 1024 / 1024).toFixed(2)} Mo) vers Supabase...`);
+    console.log(`⏳ Envoi de ${localPath} (${fileSizeMb} Mo) vers Supabase...`);
 
-    const { error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(remotePath, fileBlob, {
-        contentType: 'application/json',
-        upsert: true // Écrase le fichier s'il existe déjà
-      });
+    // Si le fichier est petit (<45Mo), upload simple
+    if (fileSize < CHUNK_SIZE) {
+      const fileBuffer = fs.readFileSync(localPath);
+      const fileBlob = new Blob([fileBuffer], { type: 'application/json' });
+      
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(remotePath, fileBlob, {
+          contentType: 'application/json',
+          upsert: true
+        });
 
-    if (error) {
-      console.error(`❌ Erreur retournée par Supabase pour ${localPath} :`, error.message);
-      process.exit(1);
-    } else {
-      console.log(`✅ ${localPath} envoyé avec succès sous le nom "${remotePath}" !`);
+      if (error) {
+        throw new Error(error.message);
+      }
+      console.log(`✅ ${localPath} envoyé avec succès !`);
+      return;
     }
+
+    // 🚀 CHUNKED UPLOAD : Découper et envoyer par morceaux
+    console.log(`📦 Fichier volumineux détecté, découpage en chunks de 45 Mo...`);
+    
+    const fileStream = fs.createReadStream(localPath, {
+      highWaterMark: CHUNK_SIZE
+    });
+
+    let chunkIndex = 0;
+    let offset = 0;
+
+    for await (const chunk of fileStream) {
+      chunkIndex++;
+      const chunkPath = `${remotePath}.chunk${chunkIndex}`;
+      
+      console.log(`  📨 Envoi du chunk ${chunkIndex} (${(chunk.length / 1024 / 1024).toFixed(2)} Mo)...`);
+
+      const chunkBlob = new Blob([chunk], { type: 'application/octet-stream' });
+      
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(chunkPath, chunkBlob, {
+          contentType: 'application/octet-stream',
+          upsert: true
+        });
+
+      if (error) {
+        throw new Error(`Erreur chunk ${chunkIndex}: ${error.message}`);
+      }
+
+      offset += chunk.length;
+      console.log(`  ✅ Chunk ${chunkIndex} envoyé (${(offset / 1024 / 1024).toFixed(2)} Mo / ${fileSizeMb} Mo)`);
+    }
+
+    // 📝 Créer un fichier de manifest pour reconstruire le fichier
+    const manifest = {
+      originalPath: remotePath,
+      totalChunks: chunkIndex,
+      totalSize: fileSize,
+      uploadedAt: new Date().toISOString()
+    };
+
+    const manifestBlob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+    await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(`${remotePath}.manifest.json`, manifestBlob, { upsert: true });
+
+    console.log(`✅ ${localPath} envoyé en ${chunkIndex} chunks avec succès !`);
+
   } catch (err) {
-    console.error(`❌ Crash système lors de l'envoi de ${localPath} :`, err);
+    console.error(`❌ Erreur lors de l'envoi de ${localPath} :`, err.message);
     process.exit(1);
   }
 }
