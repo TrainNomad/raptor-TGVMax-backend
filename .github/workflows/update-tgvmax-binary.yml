@@ -1,0 +1,125 @@
+name: Update TGVmax Data (Binary Format)
+
+on:
+  schedule:
+    - cron: '30 7 * * *'  # Chaque jour à 7h30 UTC
+  workflow_dispatch:     # Lançable manuellement
+
+jobs:
+  update-tgvmax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    permissions:
+      contents: read
+
+    steps:
+      # ───────────────────────────────────────────────────────────────
+      # 1. Code Checkout
+      # ───────────────────────────────────────────────────────────────
+      - name: "🔀 Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # ⚡ Minimiser le téléchargement
+
+      # ───────────────────────────────────────────────────────────────
+      # 2. Node.js Setup
+      # ───────────────────────────────────────────────────────────────
+      - name: "⚙️  Setup Node.js 22"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'  # ⚡ Cache npm dependencies
+
+      - name: "📦 Install dependencies"
+        run: npm ci  # Utilise package-lock.json pour reproductibilité
+        env:
+          NODE_OPTIONS: "--max-old-space-size=2048"
+
+      # ───────────────────────────────────────────────────────────────
+      # 3. Télécharger les données de référence
+      # ───────────────────────────────────────────────────────────────
+      - name: "📥 Download stations.csv"
+        run: |
+          echo "Downloading station reference..."
+          curl -fsSL "https://raw.githubusercontent.com/trainline-eu/stations/master/stations.csv" \
+            -o stations.csv
+          
+          # Vérification
+          if [ ! -f stations.csv ]; then
+            echo "❌ stations.csv download failed"
+            exit 1
+          fi
+          
+          echo "✅ stations.csv ready"
+          wc -l stations.csv
+
+      # ───────────────────────────────────────────────────────────────
+      # 4. Ingestion des données TGVmax (JSON)
+      # ───────────────────────────────────────────────────────────────
+      - name: "🔄 Ingest TGVmax data"
+        run: npm run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        timeout-minutes: 5
+
+      # ───────────────────────────────────────────────────────────────
+      # 5. 🆕 Sérialisation en format binaire
+      # ───────────────────────────────────────────────────────────────
+      - name: "🔧 Serialize to binary format"
+        run: |
+          echo "Converting trips.json to binary format..."
+          node tgvmax-to-binary.js ./engine_data/trips.json ./engine_data
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        timeout-minutes: 2
+
+      # ───────────────────────────────────────────────────────────────
+      # 6. Upload sur Supabase Storage
+      # ───────────────────────────────────────────────────────────────
+      - name: "☁️  Upload to Supabase Storage"
+        run: |
+          echo "Uploading data to Supabase..."
+          node upload-binary.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NODE_OPTIONS: "--max-old-space-size=2048"
+        timeout-minutes: 5
+
+      # ───────────────────────────────────────────────────────────────
+      # 7. Vérification et cleanup
+      # ───────────────────────────────────────────────────────────────
+      - name: "✅ Verify artifacts"
+        run: |
+          echo "Checking generated files..."
+          
+          ls -lh engine_data/ | grep -E "\.json|\.bin"
+          
+          if [ ! -f engine_data/trips.bin.gz ]; then
+            echo "❌ trips.bin.gz not found!"
+            exit 1
+          fi
+          
+          echo "✅ All artifacts present"
+
+      # ───────────────────────────────────────────────────────────────
+      # 8. Notification (optionnel)
+      # ───────────────────────────────────────────────────────────────
+      - name: "📢 Notify success"
+        if: success()
+        run: |
+          echo "✅ TGVmax data successfully updated"
+          echo "   - Binary format: trips.bin.gz"
+          echo "   - Size: $(du -h engine_data/trips.bin.gz | cut -f1)"
+          echo "   - Tripcount: $(grep -o 'Trajets stockés' engine_data/meta.json || echo 'N/A')"
+
+      # ───────────────────────────────────────────────────────────────
+      # 9. Gestion des erreurs
+      # ───────────────────────────────────────────────────────────────
+      - name: "❌ Error Report"
+        if: failure()
+        run: |
+          echo "::error::TGVmax update failed"
+          echo "Please check logs above for details"
+          exit 1
