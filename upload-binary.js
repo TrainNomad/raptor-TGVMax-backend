@@ -29,8 +29,8 @@ function sleep(ms) {
 async function uploadWithCurl(supabasePath, localFilePath, attempt = 1) {
   const url = `${supabaseUrl}/storage/v1/object/${BUCKET_NAME}/${supabasePath}`;
   
-  // x-upsert: true = PUT si existe, POST sinon (plus rapide que DELETE + POST)
-  const curlCmd = `curl -s -X POST "${url}" \
+  // Option -S -f : Affiche les erreurs précises de curl et des réponses HTTP (400, 401, 404...)
+  const curlCmd = `curl -S -f -X POST "${url}" \
     -H "Authorization: Bearer ${supabaseKey}" \
     -H "apikey: ${supabaseKey}" \
     -H "x-upsert: true" \
@@ -39,12 +39,12 @@ async function uploadWithCurl(supabasePath, localFilePath, attempt = 1) {
 
   try {
     const response = execSync(curlCmd, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 }).toString();
-    
-    if (response.includes('"error"') || response.includes('error')) {
-      throw new Error(response);
-    }
     return true;
   } catch (err) {
+    // Afficher la réponse brute de Supabase dans les logs GitHub
+    if (err.stdout) console.error("Détails HTTP Supabase:", err.stdout.toString());
+    if (err.stderr) console.error("Détails Erreur cURL:", err.stderr.toString());
+
     if (attempt < MAX_RETRIES) {
       console.log(`  ⚠️ Tentative ${attempt}/${MAX_RETRIES} échouée. Nouvelle tentative...`);
       await sleep(RETRY_DELAY);
