@@ -37,12 +37,29 @@ class BinaryTripsEngine {
   // ─────────────────────────────────────────────────────────────────────
   // Télécharger et décompresser depuis Supabase ou disque local
   // ─────────────────────────────────────────────────────────────────────
-  async loadFromUrl(url) {
+ async loadFromUrl(url) {
     console.log(`📥 Téléchargement des données binaires TGVmax...`);
     console.log(`   URL: ${url}\n`);
 
-    const buffer = await this._downloadUrl(url);
-    await this._parseBuffer(buffer);
+    const response = require('node-fetch') ? await require('node-fetch')(url) : await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Échec du téléchargement: ${response.status} ${response.statusText}`);
+    }
+
+    // 1. Récupérer le buffer brut (compressé)
+    const arrayBuffer = await response.arrayBuffer();
+    let buffer = Buffer.from(arrayBuffer);
+
+    // 2. Vérifier si le fichier est un fichier GZIP (magic bytes 0x1F 0x8B) ou se termine par .gz
+    if (buffer[0] === 0x1f && buffer[1] === 0x8b) {
+      console.log('📦 Fichier GZIP détecté, décompression en cours...');
+      buffer = await gunzip(buffer);
+      console.log('✅ Décompression réussie !');
+    }
+
+    // 3. Charger le buffer décompressé dans l'engine
+    this.loadFromBuffer(buffer);
   }
 
   async loadFromFile(filePath) {
