@@ -1,0 +1,53 @@
+name: Update Daily JSON Data
+
+on:
+  schedule:
+    - cron: '30 7 * * *'  # 7h30 UTC chaque jour
+  workflow_dispatch:
+
+jobs:
+  generate-json:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download stations.csv
+        run: |
+          curl -fsSL "https://raw.githubusercontent.com/trainline-eu/stations/master/stations.csv" -o stations.csv
+
+      - name: Ingest & build stations index
+        run: npm run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+
+      - name: Split trips into daily JSON files
+        run: node split-trips-by-date.js
+
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "bot@github.com"
+
+      - name: Commit & push daily JSON files
+        run: |
+          git add dates/*.json
+          if git diff --cached --quiet; then
+            echo "✅ Aucun changement dans les données"
+          else
+            git commit -m "chore: update daily train data $(date +%Y-%m-%d)"
+            git push origin main
+          fi
